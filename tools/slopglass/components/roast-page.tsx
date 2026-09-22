@@ -182,7 +182,7 @@ export function RoastPage() {
   const done = focus >= posts.length - 1 && currentPhase !== undefined && SETTLED.includes(currentPhase);
 
   return (
-    <div className="stage min-h-full text-[#1c1915]">
+    <div className="stage min-h-full pb-28 text-[#1c1915]">
       <header className={`mx-auto max-w-6xl px-4 sm:px-6 ${scan ? "pt-5" : "pt-10"}`}>
         {scan ? (
           <div className="mb-4">
@@ -249,7 +249,7 @@ export function RoastPage() {
       )}
 
       {scan && (
-        <main className="mx-auto mt-8 grid max-w-6xl gap-8 px-4 pb-24 sm:px-6 md:grid-cols-[minmax(0,680px)_300px]">
+        <main className="mx-auto mt-8 grid max-w-6xl gap-8 px-4 pb-28 sm:px-6 md:grid-cols-[minmax(0,680px)_300px]">
           <section className="order-2 space-y-3 md:order-1">
             {posts.slice(0, focus).map((post) => (
               <PostCard
@@ -319,6 +319,28 @@ export function RoastPage() {
           </aside>
         </main>
       )}
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4">
+        <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
+          <a
+            href="https://x.com/yannnis"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Made by Yannnis on X"
+            className="flex items-center gap-2.5 text-inherit no-underline"
+          >
+            <img src="/yannnis.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
+            <span className="flex flex-col leading-none">
+              <span className="font-mono text-[9px] font-semibold tracking-[0.12em] text-[#6a6964] uppercase">Made by</span>
+              <span className="font-heading text-base tracking-tight text-[#111110]">Yannnis</span>
+            </span>
+          </a>
+          <span className="h-6 w-px bg-black/10" aria-hidden="true" />
+          <a href="/newsletter" className="text-sm text-[#111110] underline-offset-2 hover:underline">
+            Substack
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
