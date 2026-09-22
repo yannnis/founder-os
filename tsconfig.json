@@ -42,6 +42,8 @@
     "pages",
     ".founder-pages",
     "public",
-    "tools/slopglass/node_modules"
+    "tools/slopglass/node_modules",
+    "tools/slopglass/extension",
+    "**/*.test.ts"
   ]
 }
