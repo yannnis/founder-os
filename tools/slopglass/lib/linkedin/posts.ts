@@ -137,6 +137,14 @@ export async function fetchPublicPosts(username: string): Promise<PublicPosts> {
   return { posts, name: authorName(body.data) };
 }
 
+function samePerson(author: string, username: string): boolean {
+  const left = author.toLowerCase();
+  const right = username.toLowerCase();
+  if (left === right) return true;
+  // Profile URLs append an id the posts API leaves off: yannis-psarras-7542104 vs yannis-psarras.
+  return right.startsWith(`${left}-`) || left.startsWith(`${right}-`);
+}
+
 function toPost(raw: unknown, index: number, username: string): PublicPost | null {
   if (!raw || typeof raw !== "object") return null;
   const post = raw as RawPost;
@@ -148,7 +156,7 @@ function toPost(raw: unknown, index: number, username: string): PublicPost | nul
     post.reshared === true ||
     post.reposted === true ||
     quoted !== null ||
-    (author !== "" && author.toLowerCase() !== username.toLowerCase());
+    (author !== "" && !samePerson(author, username));
   if (!text && !repost && !media) return null;
   const urn = typeof post.urn === "string" && post.urn ? post.urn : String(index);
   const time =

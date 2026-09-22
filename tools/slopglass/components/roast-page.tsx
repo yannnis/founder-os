@@ -27,6 +27,10 @@ type Scan = {
   posts: PublicPost[];
 };
 
+const PROFILE_PHOTO = "/yannnis-substack.jpg";
+const LINKEDIN_PROFILE = "https://www.linkedin.com/in/yannis-psarras";
+const SUBSTACK_PROFILE = "https://yannnis.substack.com/";
+
 const SETTLED: Phase[] = ["thin", "repost", "error", "ready"];
 
 export function RoastPage() {
@@ -118,20 +122,26 @@ export function RoastPage() {
   const currentPhase = current ? cards[current.id]?.phase : undefined;
 
   useEffect(() => {
-    if (!scan || !current) return;
-    if (!currentPhase || currentPhase === "idle") {
-      request(current.id, current.text, current.repost, scanId.current);
-      return;
+    if (!scan) return;
+    const token = scanId.current;
+    const end = Math.min(posts.length, focus + 3);
+    for (let index = focus; index < end; index += 1) {
+      const post = posts[index];
+      request(post.id, post.text, post.repost, token);
     }
-    if (currentPhase === "reading") return;
-    if (focus >= posts.length - 1) return;
-    const dwell = currentPhase === "ready" ? 1400 : currentPhase === "error" ? 4000 : 800;
-    const timer = window.setTimeout(() => setFocus((index) => index + 1), dwell);
-    return () => window.clearTimeout(timer);
-  }, [current, currentPhase, focus, posts.length, request, scan]);
+  }, [focus, posts, request, scan]);
 
   useEffect(() => {
-    focusNode.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (!scan || !current) return;
+    if (!currentPhase || currentPhase === "idle" || currentPhase === "reading") return;
+    if (focus >= posts.length - 1) return;
+    const dwell = currentPhase === "ready" ? 550 : currentPhase === "error" ? 1600 : 280;
+    const timer = window.setTimeout(() => setFocus((index) => index + 1), dwell);
+    return () => window.clearTimeout(timer);
+  }, [current, currentPhase, focus, posts.length, scan]);
+
+  useEffect(() => {
+    focusNode.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [focus, scan]);
 
   function openMine() {
@@ -176,14 +186,12 @@ export function RoastPage() {
 
   const tally = useMemo(() => {
     const items: Contribution[] = [];
-    let pending = 0;
     for (const post of posts) {
       const card = cards[post.id];
       const item = contribution(post, card);
       if (item) items.push(item);
-      else pending += 1;
     }
-    return { ...tallyOf(items), pending, total: posts.length };
+    return { ...tallyOf(items), pending: 0, total: posts.length };
   }, [cards, posts]);
 
   const ahead = posts.slice(focus + 1, focus + 3);
@@ -304,7 +312,7 @@ export function RoastPage() {
                 band={tally.band}
                 judged={tally.judged}
                 total={tally.total}
-                pending={currentPhase === "reading" ? 1 : 0}
+                pending={posts.filter((post) => cards[post.id]?.phase === "reading").length}
                 read={tally.read}
                 skim={tally.skim}
                 pass={tally.pass}
@@ -312,7 +320,9 @@ export function RoastPage() {
               {tally.skipped > 0 ? (
                 <p className="mt-3 text-center text-xs text-[#6f685e]">{tally.skipped} reposts left out</p>
               ) : null}
-              <p className="font-heading mt-4 text-center text-lg leading-7 italic">{tally.roast}</p>
+              {(tally.judged > 0 || done) && (
+                <p className="font-heading mt-4 text-center text-lg leading-7 italic">{tally.roast}</p>
+              )}
               <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">
                 Pass counts whole, skim counts half. {MODEL_ID}.
               </p>
@@ -323,10 +333,16 @@ export function RoastPage() {
 
       <div className="pointer-events-none fixed inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4">
         <div className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
-          <img src="/yannnis-substack.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
+          <img
+            src={PROFILE_PHOTO}
+            alt=""
+            width={34}
+            height={34}
+            className="size-[34px] shrink-0 rounded-full object-cover bg-[#ddd8cf]"
+          />
           <span className="flex items-center gap-2 text-sm text-[#111110]">
             <a
-              href="https://www.linkedin.com/in/yannis-psarras-7542104"
+              href={LINKEDIN_PROFILE}
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:underline"
@@ -337,7 +353,7 @@ export function RoastPage() {
               |
             </span>
             <a
-              href="https://yannnis.substack.com/"
+              href={SUBSTACK_PROFILE}
               target="_blank"
               rel="noopener noreferrer"
               className="underline-offset-2 hover:underline"

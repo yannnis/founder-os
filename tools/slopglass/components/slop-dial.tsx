@@ -45,7 +45,8 @@ export function SlopDial({
   pass: number;
 }) {
   const shown = score === null ? null : Math.round(score);
-  const turn = shown === null ? -90 : -90 + (shown / 100) * 180;
+  const armed = judged > 0 || shown !== null;
+  const turn = armed ? -90 + ((shown ?? 0) / 100) * 180 : 0;
   const hub = band ? COLORS[band.id] : "#8a8175";
 
   return (
@@ -60,6 +61,7 @@ export function SlopDial({
           />
         ))}
         <g
+          key={`${judged}-${shown ?? "wait"}`}
           className="worth-needle"
           style={{
             transformOrigin: "100px 108px",
