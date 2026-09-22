@@ -321,25 +321,13 @@ export function RoastPage() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4">
-        <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
-          <a
-            href="https://x.com/yannnis"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Made by Yannnis on X"
-            className="flex items-center gap-2.5 text-inherit no-underline"
-          >
-            <img src="/yannnis.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
-            <span className="flex flex-col leading-none">
-              <span className="font-mono text-[9px] font-semibold tracking-[0.12em] text-[#6a6964] uppercase">Made by</span>
-              <span className="font-heading text-base tracking-tight text-[#111110]">Yannnis</span>
-            </span>
-          </a>
-          <span className="h-6 w-px bg-black/10" aria-hidden="true" />
-          <a href="/newsletter" className="text-sm text-[#111110] underline-offset-2 hover:underline">
-            Substack
-          </a>
-        </div>
+        <a
+          href="/newsletter"
+          className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 text-inherit no-underline shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md"
+        >
+          <img src="/yannnis.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
+          <span className="font-heading text-base tracking-tight text-[#111110]">Subscribe to my Substack</span>
+        </a>
       </div>
     </div>
   );
