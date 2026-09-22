@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from "react";
 
 import { LinkedInPost } from "@/components/linkedin-post";
 import { SlopDial } from "@/components/slop-dial";
@@ -10,7 +10,7 @@ import type { LinkedInProfile } from "@/lib/linkedin/url";
 import type { PublicPost } from "@/lib/linkedin/posts";
 import { MODEL_ID } from "@/lib/slop/rubric";
 import type { ClassifyResponse } from "@/lib/slop/types";
-import { THIN_REASON, bucketOf, postReason, tallyOf, type Contribution, type WorthFeatures } from "@/lib/slop/worth";
+import { THIN_REASON, bandFor, bucketOf, postReason, tallyOf, type Contribution, type WorthFeatures } from "@/lib/slop/worth";
 
 type Phase = "idle" | "reading" | "thin" | "repost" | "error" | "ready";
 
@@ -37,6 +37,9 @@ export function RoastPage() {
   const [cards, setCards] = useState<Record<string, CardState>>({});
   const [focus, setFocus] = useState(0);
   const [health, setHealth] = useState<"unknown" | "ready" | "nokey" | "down">("unknown");
+  const [otherProfile, setOtherProfile] = useState(false);
+  const [mineHint, setMineHint] = useState(false);
+  const profileInput = useRef<HTMLInputElement>(null);
   const phases = useRef<Record<string, Phase>>({});
   const scanId = useRef(0);
   const focusNode = useRef<HTMLElement | null>(null);
@@ -132,6 +135,17 @@ export function RoastPage() {
     focusNode.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [focus, scan]);
 
+  function openMine() {
+    if (url.trim()) {
+      profileInput.current?.form?.requestSubmit();
+      return;
+    }
+    window.open("https://www.linkedin.com/in/me/", "_blank", "noopener,noreferrer");
+    setOtherProfile(true);
+    setMineHint(true);
+    window.setTimeout(() => profileInput.current?.focus(), 0);
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const token = scanId.current + 1;
@@ -191,46 +205,80 @@ export function RoastPage() {
           </div>
         ) : (
           <>
-            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Worth reading</p>
-            <h1 className="font-heading text-5xl tracking-tight sm:text-6xl">Audit</h1>
+            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">LinkedIn</p>
+            <h1 className="font-heading max-w-3xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
             <p className="mt-3 max-w-xl text-sm leading-6 text-[#5c564c]">
-              Paste a public profile. Jev reads the first 20 posts one at a time and the score moves as each one lands.
-              Nothing to install, and LinkedIn login is not part of it.
+              The first 20 public posts, read one at a time. Nothing to install, and no LinkedIn login on this site.
             </p>
           </>
         )}
 
-        <form onSubmit={onSubmit} className={`flex flex-col gap-3 sm:flex-row ${scan ? "max-w-xl" : "mt-6"}`}>
-          <label className="sr-only" htmlFor="profile-url">
-            LinkedIn profile URL
-          </label>
-          <input
-            id="profile-url"
-            value={url}
-            onChange={(event) => setUrl(event.target.value)}
-            placeholder="linkedin.com/in/your-name"
-            autoComplete="off"
-            spellCheck={false}
-            className="h-12 min-w-0 flex-1 rounded-full border border-[#e7dfd2] bg-[#fffdf8] px-5 text-sm outline-none ring-[#1c1915]/15 focus:ring-3"
-          />
-          <button
-            type="submit"
-            disabled={loading || url.trim().length === 0}
-            className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
-          >
-            {loading ? "Pulling posts…" : scan ? "Read another" : "Read the posts"}
-          </button>
-        </form>
-
-        {!scan && (
-          <p className="mt-3 max-w-xl text-xs leading-5 text-[#6f685e]">
-            Only what LinkedIn shows on a public profile. Reposts stay out of the score. Likes don&apos;t move it.{" "}
-            <a href="/linkedin-audit/demo" className="underline underline-offset-2">
-              Sample feed
-            </a>
-          </p>
+        {scan ? (
+          <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
+            <ProfileField inputRef={profileInput} url={url} onChange={setUrl} placeholder="linkedin.com/in/your-name" />
+            <button
+              type="submit"
+              disabled={loading || url.trim().length === 0}
+              className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
+            >
+              {loading ? "Pulling posts…" : "Read another"}
+            </button>
+          </form>
+        ) : otherProfile || mineHint ? (
+          <form onSubmit={onSubmit} className="mt-6 max-w-xl">
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <ProfileField
+                inputRef={profileInput}
+                url={url}
+                onChange={setUrl}
+                placeholder={mineHint ? "Paste the profile LinkedIn just opened" : "linkedin.com/in/their-name"}
+              />
+              <button
+                type="submit"
+                disabled={loading || url.trim().length === 0}
+                className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
+              >
+                {loading ? "Pulling posts…" : "Run it"}
+              </button>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#6f685e]">
+              {mineHint
+                ? "LinkedIn opened your profile. Paste that address."
+                : "A public linkedin.com/in/… link. Reposts stay out of the score."}{" "}
+              <button
+                type="button"
+                onClick={mineHint ? () => { setMineHint(false); setOtherProfile(true); } : openMine}
+                className="underline underline-offset-2"
+              >
+                {mineHint ? "A different profile" : "Run it for me instead"}
+              </button>
+            </p>
+          </form>
+        ) : (
+          <div className="mt-6 flex flex-col items-start gap-3">
+            <button
+              type="button"
+              onClick={openMine}
+              className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
+            >
+              Run it for me
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOtherProfile(true);
+                setMineHint(false);
+                window.setTimeout(() => profileInput.current?.focus(), 0);
+              }}
+              className="text-sm text-[#6f685e] underline underline-offset-2"
+            >
+              A different profile
+            </button>
+          </div>
         )}
       </header>
+
+      {!scan && <ResultPreview />}
 
       {health === "nokey" && (
         <p className="mx-auto mt-4 max-w-6xl px-4 text-sm text-[#8d2a16] sm:px-6">
@@ -325,11 +373,94 @@ export function RoastPage() {
           href="/newsletter"
           className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 text-inherit no-underline shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md"
         >
-          <img src="/yannnis.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
+          <img src="/yannnis-substack.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
           <span className="font-heading text-base tracking-tight text-[#111110]">Subscribe to my Substack</span>
         </a>
       </div>
     </div>
+  );
+}
+
+function ProfileField({
+  inputRef,
+  url,
+  onChange,
+  placeholder,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+  url: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <>
+      <label className="sr-only" htmlFor="profile-url">
+        LinkedIn profile URL
+      </label>
+      <input
+        ref={inputRef}
+        id="profile-url"
+        value={url}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        autoComplete="off"
+        spellCheck={false}
+        className="h-12 min-w-0 flex-1 rounded-full border border-[#e7dfd2] bg-[#fffdf8] px-5 text-sm outline-none ring-[#1c1915]/15 focus:ring-3"
+      />
+    </>
+  );
+}
+
+const PREVIEW_POSTS: PublicPost[] = [
+  {
+    id: "preview-1",
+    text: "A public post lands here. A short note sits under it, then the next post comes into focus.",
+    repost: false,
+    time: "2d",
+    headline: "What you do",
+    avatar: null,
+    reactions: 18,
+    comments: 3,
+    reposts: 1,
+    media: null,
+    quoted: null,
+  },
+  {
+    id: "preview-2",
+    text: "The one after it stays soft until the first note is done.",
+    repost: false,
+    time: "5d",
+    headline: "What you do",
+    avatar: null,
+    reactions: 4,
+    comments: 0,
+    reposts: 0,
+    media: null,
+    quoted: null,
+  },
+];
+
+function ResultPreview() {
+  const band = bandFor(64);
+  return (
+    <section className="mx-auto mt-10 max-w-6xl px-4 pb-8 sm:px-6" aria-label="Preview of a finished read">
+      <p className="mb-3 inline-flex rounded-full border border-[#e7dfd2] bg-[#fffdf8] px-3 py-1 text-[11px] tracking-[0.16em] text-[#6f685e] uppercase">
+        Preview
+      </p>
+      <div className="pointer-events-none grid gap-8 blur-[3px] select-none md:grid-cols-[minmax(0,680px)_300px]" aria-hidden="true">
+        <div className="space-y-3">
+          <LinkedInPost post={PREVIEW_POSTS[0]} name="Your name" />
+          <div className="opacity-50">
+            <LinkedInPost post={PREVIEW_POSTS[1]} name="Your name" compact />
+          </div>
+        </div>
+        <aside className="h-fit rounded-[28px] bg-[#fffdf8]/90 p-5 ring-1 ring-[#e7dfd2]">
+          <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Post 2 of 20</p>
+          <SlopDial score={64} band={band} judged={2} total={20} pending={1} read={1} skim={1} pass={0} />
+          <p className="font-heading mt-4 text-center text-lg leading-7 italic">The score moves as each post lands.</p>
+        </aside>
+      </div>
+    </section>
   );
 }
 
