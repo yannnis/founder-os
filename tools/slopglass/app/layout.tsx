@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Newsreader, Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -14,10 +15,10 @@ const newsreader = Newsreader({
 
 export const metadata: Metadata = {
   title: "Slopglass",
-  description: "How much of a LinkedIn feed or profile is worth reading, judged by Jev.",
+  description: "Paste a public LinkedIn profile. Jev scores the first 20 posts, one at a time.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${outfit.variable} ${newsreader.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">{children}</body>

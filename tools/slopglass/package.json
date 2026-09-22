@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 38471",
     "lint": "eslint",
-    "test": "tsx --test lib/slop/policy.test.ts lib/slop/worth.test.ts extension/extract.test.ts",
+    "test": "tsx --test lib/slop/policy.test.ts lib/slop/worth.test.ts lib/linkedin/url.test.ts extension/extract.test.ts",
     "pack:extension": "rm -f public/slopglass-extension.zip && zip -r public/slopglass-extension.zip extension -x '*.DS_Store' -x 'extension/*.test.ts' -x 'extension/fixture.html'"
   },
   "dependencies": {

@@ -1,0 +1,7 @@
+node_modules
+.next
+public
+.founder-pages
+next-env.d.ts
+.vercel
+.env*

@@ -7,7 +7,7 @@ Each post is **Read**, **Skim**, or **Pass**. The number on the dial is the shar
 There are two totals:
 
 - **Feed.** How much of the scroll in front of you is worth your time. Posts are judged as they reach the screen.
-- **Profile.** How much of one person’s recent posts is worth reading. The demo has two sample profiles. On LinkedIn, a `/in/` page totals that profile.
+- **Profile.** How much of one person’s recent posts is worth reading. On yannnis.com this lives at `/linkedin-audit`. `/linkedin-audit/demo` still has two sample profiles.
 
 The judgment comes from [Jev](https://docs.typesafe.ai), TypeSafe’s System One model. Jev answers six yes-or-no questions. The bucket is those answers, composed in code. It does not guess whether a model wrote the post, and likes do not move the score.
 
@@ -19,10 +19,11 @@ The dial runs green on the left to red on the right: We’re so back (0–35), A
 npm install
 cp .env.example .env.local
 # put your TypeSafe key in TYPESAFE_API_KEY
+# put a RapidAPI key in RAPIDAPI_KEY, subscribed to Professional Network Data (free Basic plan)
 npm run dev
 ```
 
-Open http://127.0.0.1:38471.
+Open http://127.0.0.1:38471/linkedin-audit. It takes a public `linkedin.com/in/…` URL, loads the first 20 posts, and scores them one at a time. The fixture feed stays at `/linkedin-audit/demo`. Both keys stay in `.env.local`.
 
 ## Put it on LinkedIn
 
