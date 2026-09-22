@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from "react";
 
 import { LinkedInPost } from "@/components/linkedin-post";
+import { auditBreakdown, RoastSummary } from "@/components/roast-summary";
 import { SlopDial } from "@/components/slop-dial";
 import { Button } from "@/components/ui/button";
 import { WorthBar, type ReadyReading } from "@/components/worth-bar";
 import type { LinkedInProfile } from "@/lib/linkedin/url";
 import type { PublicPost } from "@/lib/linkedin/posts";
+import { LINKEDIN_PROFILE, PROFILE_PHOTO, SUBSTACK_PROFILE } from "@/lib/site/constants";
 import { MODEL_ID } from "@/lib/slop/rubric";
 import type { ClassifyResponse } from "@/lib/slop/types";
 import { THIN_REASON, bandFor, bucketOf, postReason, tallyOf, type Contribution, type WorthFeatures } from "@/lib/slop/worth";
@@ -26,10 +28,6 @@ type Scan = {
   profile: LinkedInProfile;
   posts: PublicPost[];
 };
-
-const PROFILE_PHOTO = "/yannnis-substack.jpg";
-const LINKEDIN_PROFILE = "https://www.linkedin.com/in/yannis-psarras";
-const SUBSTACK_PROFILE = "https://yannnis.substack.com/";
 
 const SETTLED: Phase[] = ["thin", "repost", "error", "ready"];
 
@@ -194,6 +192,8 @@ export function RoastPage() {
     return { ...tallyOf(items), pending: 0, total: posts.length };
   }, [cards, posts]);
 
+  const breakdown = useMemo(() => auditBreakdown(posts, cards), [cards, posts]);
+
   const ahead = posts.slice(focus + 1, focus + 3);
   const done = focus >= posts.length - 1 && currentPhase !== undefined && SETTLED.includes(currentPhase);
 
@@ -300,6 +300,8 @@ export function RoastPage() {
                 {posts.length - focus - 1 - ahead.length} still out of focus
               </p>
             )}
+
+            {done && <RoastSummary tally={tally} breakdown={breakdown} total={posts.length} />}
           </section>
 
           <aside className="order-1 md:sticky md:top-4 md:order-2 md:self-start">
