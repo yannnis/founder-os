@@ -369,13 +369,30 @@ export function RoastPage() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex justify-center px-4">
-        <a
-          href="/newsletter"
-          className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 text-inherit no-underline shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md"
-        >
+        <div className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-black/8 bg-[#eceae4]/90 py-1.5 pr-4 pl-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] backdrop-blur-md">
           <img src="/yannnis-substack.jpg" alt="" width={34} height={34} className="size-[34px] shrink-0 rounded-full object-cover" />
-          <span className="font-heading text-base tracking-tight text-[#111110]">Subscribe to my Substack</span>
-        </a>
+          <span className="flex items-center gap-2 text-sm text-[#111110]">
+            <a
+              href="https://www.linkedin.com/in/yannis-psarras-7542104"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 hover:underline"
+            >
+              LinkedIn
+            </a>
+            <span aria-hidden="true" className="text-black/30">
+              |
+            </span>
+            <a
+              href="https://yannnis.substack.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline-offset-2 hover:underline"
+            >
+              Substack
+            </a>
+          </span>
+        </div>
       </div>
     </div>
   );
