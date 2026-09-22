@@ -1,0 +1,214 @@
+{
+  "posts": [
+    {
+      "id": "slop-announce",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.9,
+        "fresh": 0.53,
+        "bait": 0.64,
+        "promo": 0.96,
+        "empty": 0.78,
+        "funny": 0.02
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-hustle",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.37,
+        "fresh": 0.37,
+        "bait": 0.83,
+        "promo": 0.19,
+        "empty": 0.24,
+        "funny": 0.04
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-self-label",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.05,
+        "fresh": 0.08,
+        "bait": 0.82,
+        "promo": 0.06,
+        "empty": 0.88,
+        "funny": 0.02
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-lessons",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.27,
+        "fresh": 0.44,
+        "bait": 0.83,
+        "promo": 0.11,
+        "empty": 0.49,
+        "funny": 0.03
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-quiet",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.03,
+        "fresh": 0.1,
+        "bait": 0.05,
+        "promo": 0.03,
+        "empty": 0.73,
+        "funny": 0.04
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-paragraph",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.04,
+        "fresh": 0.13,
+        "bait": 0.07,
+        "promo": 0.06,
+        "empty": 0.9,
+        "funny": 0.01
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-incident",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.98,
+        "fresh": 0.94,
+        "bait": 0.37,
+        "promo": 0.04,
+        "empty": 0.02,
+        "funny": 0.85
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-tech",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.96,
+        "fresh": 0.96,
+        "bait": 0.05,
+        "promo": 0.02,
+        "empty": 0.01,
+        "funny": 0.65
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-opinion",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.83,
+        "fresh": 0.85,
+        "bait": 0.12,
+        "promo": 0.02,
+        "empty": 0.03,
+        "funny": 0.65
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-job",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.97,
+        "fresh": 0.95,
+        "bait": 0.26,
+        "promo": 0.27,
+        "empty": 0.05,
+        "funny": 0.56
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-short",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.95,
+        "fresh": 0.94,
+        "bait": 0.16,
+        "promo": 0.02,
+        "empty": 0.02,
+        "funny": 0.57
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "mixed-polished",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.98,
+        "fresh": 0.96,
+        "bait": 0.03,
+        "promo": 0.02,
+        "empty": 0.03,
+        "funny": 0.09
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "mixed-linebreaks",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.86,
+        "fresh": 0.89,
+        "bait": 0.04,
+        "promo": 0.03,
+        "empty": 0.05,
+        "funny": 0.11
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "human-complaint",
+      "expect": "read",
+      "bucket": "read",
+      "features": {
+        "specific": 0.97,
+        "fresh": 0.96,
+        "bait": 0.03,
+        "promo": 0.02,
+        "empty": 0.02,
+        "funny": 0.32
+      },
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "slop-gratitude",
+      "expect": "pass",
+      "bucket": "pass",
+      "features": {
+        "specific": 0.04,
+        "fresh": 0.11,
+        "bait": 0.79,
+        "promo": 0.11,
+        "empty": 0.85,
+        "funny": 0.02
+      },
+      "model": "jev-1.13.0"
+    }
+  ]
+}

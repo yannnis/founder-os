@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slopglass</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <p class="mark">Slopglass</p>
+      <p class="sub">Read, skim, or pass, while you scroll LinkedIn.</p>
+    </header>
+    <label class="toggle">
+      <input id="enabled" type="checkbox" />
+      <span>Show badges while I scroll</span>
+    </label>
+    <fieldset>
+      <legend>What to total</legend>
+      <label><input type="radio" name="mode" value="auto" /> Auto, from the page</label>
+      <label><input type="radio" name="mode" value="feed" /> This scroll</label>
+      <label><input type="radio" name="mode" value="profile" /> This profile</label>
+    </fieldset>
+    <label class="stack" for="server">Slopglass server</label>
+    <input id="server" type="url" spellcheck="false" />
+    <p id="status" role="status"></p>
+    <button id="save" type="button">Save and check</button>
+    <script src="popup.js"></script>
+  </body>
+</html>

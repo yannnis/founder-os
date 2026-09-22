@@ -1,0 +1,291 @@
+{
+  "ranAt": "2026-09-22T05:45:33.251Z",
+  "rows": [
+    {
+      "id": "slop-announce",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.751,
+      "confidence": 0.43,
+      "model": "jev-1.13.0",
+      "latencyMs": 361,
+      "reason": "sounds model-written · stock post shape · interchangeable claim",
+      "features": {
+        "pHuman": 0.04,
+        "pAssisted": 0.34,
+        "pGenerated": 0.62,
+        "voiceConfidence": 0.43,
+        "template": 0.98,
+        "interchangeable": 0.78,
+        "livedDetail": 0.62,
+        "engagementBait": 0.43,
+        "cadence": 0.995
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "slop-hustle",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.785,
+      "confidence": 0.37,
+      "model": "jev-1.13.0",
+      "latencyMs": 309,
+      "reason": "sounds model-written · stock post shape · interchangeable claim",
+      "features": {
+        "pHuman": 0.19,
+        "pAssisted": 0.23,
+        "pGenerated": 0.58,
+        "voiceConfidence": 0.37,
+        "template": 0.98,
+        "interchangeable": 0.93,
+        "livedDetail": 0.22,
+        "engagementBait": 0.71,
+        "cadence": 0.75
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "slop-self-label",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.964,
+      "confidence": 0.96,
+      "model": "jev-1.13.0",
+      "latencyMs": 237,
+      "reason": "sounds model-written · stock post shape · interchangeable claim",
+      "features": {
+        "pHuman": 0,
+        "pAssisted": 0.02,
+        "pGenerated": 0.98,
+        "voiceConfidence": 0.96,
+        "template": 0.96,
+        "interchangeable": 0.94,
+        "livedDetail": 0.02,
+        "engagementBait": 0.83,
+        "cadence": 0.995
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "slop-lessons",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.803,
+      "confidence": 0.27,
+      "model": "jev-1.13.0",
+      "latencyMs": 114,
+      "reason": "stock post shape · interchangeable claim · no lived detail",
+      "features": {
+        "pHuman": 0.16,
+        "pAssisted": 0.32,
+        "pGenerated": 0.52,
+        "voiceConfidence": 0.27,
+        "template": 0.98,
+        "interchangeable": 0.92,
+        "livedDetail": 0.04,
+        "engagementBait": 0.67,
+        "cadence": 0.845
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "slop-quiet",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.845,
+      "confidence": 0.68,
+      "model": "jev-1.13.0",
+      "latencyMs": 131,
+      "reason": "sounds model-written · stock post shape · interchangeable claim",
+      "features": {
+        "pHuman": 0.03,
+        "pAssisted": 0.18,
+        "pGenerated": 0.79,
+        "voiceConfidence": 0.68,
+        "template": 0.9,
+        "interchangeable": 0.95,
+        "livedDetail": 0.02,
+        "engagementBait": 0.02,
+        "cadence": 0.995
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "slop-paragraph",
+      "expect": "slop",
+      "verdict": "slop",
+      "score": 0.73,
+      "confidence": 0.88,
+      "model": "jev-1.13.0",
+      "latencyMs": 162,
+      "reason": "sounds model-written · interchangeable claim · no lived detail",
+      "features": {
+        "pHuman": 0.01,
+        "pAssisted": 0.07,
+        "pGenerated": 0.92,
+        "voiceConfidence": 0.88,
+        "template": 0.12,
+        "interchangeable": 0.71,
+        "livedDetail": 0.02,
+        "engagementBait": 0.02,
+        "cadence": 1
+      },
+      "presets": "lenient:slop balanced:slop strict:slop"
+    },
+    {
+      "id": "human-incident",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.055,
+      "confidence": 0.95,
+      "model": "jev-1.13.0",
+      "latencyMs": 124,
+      "reason": "sounds like a person · has a lived detail · spoken cadence",
+      "features": {
+        "pHuman": 0.97,
+        "pAssisted": 0,
+        "pGenerated": 0.03,
+        "voiceConfidence": 0.95,
+        "template": 0.06,
+        "interchangeable": 0.17,
+        "livedDetail": 0.98,
+        "engagementBait": 0.06,
+        "cadence": 0.005
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "human-tech",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.142,
+      "confidence": 0.93,
+      "model": "jev-1.13.0",
+      "latencyMs": 187,
+      "reason": "sounds like a person · has a lived detail · spoken cadence",
+      "features": {
+        "pHuman": 0.96,
+        "pAssisted": 0.01,
+        "pGenerated": 0.03,
+        "voiceConfidence": 0.93,
+        "template": 0.14,
+        "interchangeable": 0.57,
+        "livedDetail": 0.89,
+        "engagementBait": 0.03,
+        "cadence": 0.02
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "human-opinion",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.214,
+      "confidence": 0.96,
+      "model": "jev-1.13.0",
+      "latencyMs": 216,
+      "reason": "sounds like a person · interchangeable claim · has a lived detail",
+      "features": {
+        "pHuman": 0.97,
+        "pAssisted": 0.01,
+        "pGenerated": 0.02,
+        "voiceConfidence": 0.96,
+        "template": 0.33,
+        "interchangeable": 0.8,
+        "livedDetail": 0.78,
+        "engagementBait": 0.03,
+        "cadence": 0.01
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "human-job",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.078,
+      "confidence": 0.97,
+      "model": "jev-1.13.0",
+      "latencyMs": 217,
+      "reason": "sounds like a person · has a lived detail · spoken cadence",
+      "features": {
+        "pHuman": 0.98,
+        "pAssisted": 0,
+        "pGenerated": 0.02,
+        "voiceConfidence": 0.97,
+        "template": 0.13,
+        "interchangeable": 0.27,
+        "livedDetail": 0.97,
+        "engagementBait": 0.06,
+        "cadence": 0
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "human-short",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.068,
+      "confidence": 0.96,
+      "model": "jev-1.13.0",
+      "latencyMs": 154,
+      "reason": "sounds like a person · has a lived detail · spoken cadence",
+      "features": {
+        "pHuman": 0.98,
+        "pAssisted": 0,
+        "pGenerated": 0.02,
+        "voiceConfidence": 0.96,
+        "template": 0.1,
+        "interchangeable": 0.21,
+        "livedDetail": 0.97,
+        "engagementBait": 0.1,
+        "cadence": 0.005
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "mixed-polished",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.078,
+      "confidence": 0.98,
+      "model": "jev-1.13.0",
+      "latencyMs": 141,
+      "reason": "sounds like a person · has a lived detail · spoken cadence",
+      "features": {
+        "pHuman": 0.99,
+        "pAssisted": 0.01,
+        "pGenerated": 0,
+        "voiceConfidence": 0.98,
+        "template": 0.05,
+        "interchangeable": 0.26,
+        "livedDetail": 0.98,
+        "engagementBait": 0.02,
+        "cadence": 0.235
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    },
+    {
+      "id": "mixed-linebreaks",
+      "expect": "human",
+      "verdict": "human",
+      "score": 0.275,
+      "confidence": 0.9,
+      "model": "jev-1.13.0",
+      "latencyMs": 143,
+      "reason": "sounds like a person · interchangeable claim · has a lived detail",
+      "features": {
+        "pHuman": 0.93,
+        "pAssisted": 0.04,
+        "pGenerated": 0.03,
+        "voiceConfidence": 0.9,
+        "template": 0.64,
+        "interchangeable": 0.87,
+        "livedDetail": 0.84,
+        "engagementBait": 0.03,
+        "cadence": 0.05
+      },
+      "presets": "lenient:human balanced:human strict:human"
+    }
+  ]
+}
