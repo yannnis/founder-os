@@ -37,7 +37,6 @@ export function RoastPage() {
   const [cards, setCards] = useState<Record<string, CardState>>({});
   const [focus, setFocus] = useState(0);
   const [health, setHealth] = useState<"unknown" | "ready" | "nokey" | "down">("unknown");
-  const [otherProfile, setOtherProfile] = useState(false);
   const [mineHint, setMineHint] = useState(false);
   const profileInput = useRef<HTMLInputElement>(null);
   const phases = useRef<Record<string, Phase>>({});
@@ -136,12 +135,7 @@ export function RoastPage() {
   }, [focus, scan]);
 
   function openMine() {
-    if (url.trim()) {
-      profileInput.current?.form?.requestSubmit();
-      return;
-    }
     window.open("https://www.linkedin.com/in/me/", "_blank", "noopener,noreferrer");
-    setOtherProfile(true);
     setMineHint(true);
     window.setTimeout(() => profileInput.current?.focus(), 0);
   }
@@ -213,7 +207,7 @@ export function RoastPage() {
           </>
         )}
 
-        {scan ? (
+        {scan && (
           <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
             <ProfileField inputRef={profileInput} url={url} onChange={setUrl} placeholder="linkedin.com/in/your-name" />
             <button
@@ -224,61 +218,20 @@ export function RoastPage() {
               {loading ? "Pulling posts…" : "Read another"}
             </button>
           </form>
-        ) : otherProfile || mineHint ? (
-          <form onSubmit={onSubmit} className="mt-6 max-w-xl">
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <ProfileField
-                inputRef={profileInput}
-                url={url}
-                onChange={setUrl}
-                placeholder={mineHint ? "Paste the profile LinkedIn just opened" : "linkedin.com/in/their-name"}
-              />
-              <button
-                type="submit"
-                disabled={loading || url.trim().length === 0}
-                className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
-              >
-                {loading ? "Pulling posts…" : "Run it"}
-              </button>
-            </div>
-            <p className="mt-3 text-xs leading-5 text-[#6f685e]">
-              {mineHint
-                ? "LinkedIn opened your profile. Paste that address."
-                : "A public linkedin.com/in/… link. Reposts stay out of the score."}{" "}
-              <button
-                type="button"
-                onClick={mineHint ? () => { setMineHint(false); setOtherProfile(true); } : openMine}
-                className="underline underline-offset-2"
-              >
-                {mineHint ? "A different profile" : "Run it for me instead"}
-              </button>
-            </p>
-          </form>
-        ) : (
-          <div className="mt-6 flex flex-col items-start gap-3">
-            <button
-              type="button"
-              onClick={openMine}
-              className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
-            >
-              Run it for me
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setOtherProfile(true);
-                setMineHint(false);
-                window.setTimeout(() => profileInput.current?.focus(), 0);
-              }}
-              className="text-sm text-[#6f685e] underline underline-offset-2"
-            >
-              A different profile
-            </button>
-          </div>
         )}
       </header>
 
-      {!scan && <ResultPreview />}
+      {!scan && (
+        <ResultPreview
+          url={url}
+          onChange={setUrl}
+          inputRef={profileInput}
+          loading={loading}
+          mineHint={mineHint}
+          onSubmit={onSubmit}
+          onMine={openMine}
+        />
+      )}
 
       {health === "nokey" && (
         <p className="mx-auto mt-4 max-w-6xl px-4 text-sm text-[#8d2a16] sm:px-6">
@@ -428,54 +381,115 @@ function ProfileField({
   );
 }
 
+const PREVIEW_NAME = "Jordan Hale";
+
+const PREVIEW_FEATURES: WorthFeatures = {
+  specific: 0.9,
+  fresh: 0.86,
+  bait: 0.04,
+  promo: 0.08,
+  empty: 0.06,
+  funny: 0.12,
+};
+
 const PREVIEW_POSTS: PublicPost[] = [
   {
     id: "preview-1",
-    text: "A public post lands here. A short note sits under it, then the next post comes into focus.",
+    text: "We rewrote onboarding last week. The old flow asked for company size before it asked for a name. Support tickets about “I never got in” dropped the next morning.",
     repost: false,
     time: "2d",
-    headline: "What you do",
+    headline: "Product at a company you have heard of",
     avatar: null,
-    reactions: 18,
-    comments: 3,
-    reposts: 1,
+    reactions: 86,
+    comments: 14,
+    reposts: 3,
     media: null,
     quoted: null,
   },
   {
     id: "preview-2",
-    text: "The one after it stays soft until the first note is done.",
+    text: "Three customers said the same thing on calls this month. They don’t want another dashboard. They want the one number that changed since last Tuesday.",
     repost: false,
     time: "5d",
-    headline: "What you do",
+    headline: "Product at a company you have heard of",
     avatar: null,
-    reactions: 4,
-    comments: 0,
-    reposts: 0,
+    reactions: 41,
+    comments: 6,
+    reposts: 1,
     media: null,
     quoted: null,
   },
 ];
 
-function ResultPreview() {
+function ResultPreview({
+  url,
+  onChange,
+  inputRef,
+  loading,
+  mineHint,
+  onSubmit,
+  onMine,
+}: {
+  url: string;
+  onChange: (value: string) => void;
+  inputRef: RefObject<HTMLInputElement | null>;
+  loading: boolean;
+  mineHint: boolean;
+  onSubmit: (event: FormEvent) => void;
+  onMine: () => void;
+}) {
   const band = bandFor(64);
   return (
-    <section className="mx-auto mt-10 max-w-6xl px-4 pb-8 sm:px-6" aria-label="Preview of a finished read">
-      <p className="mb-3 inline-flex rounded-full border border-[#e7dfd2] bg-[#fffdf8] px-3 py-1 text-[11px] tracking-[0.16em] text-[#6f685e] uppercase">
-        Preview
-      </p>
-      <div className="pointer-events-none grid gap-8 blur-[3px] select-none md:grid-cols-[minmax(0,680px)_300px]" aria-hidden="true">
-        <div className="space-y-3">
-          <LinkedInPost post={PREVIEW_POSTS[0]} name="Your name" />
-          <div className="opacity-50">
-            <LinkedInPost post={PREVIEW_POSTS[1]} name="Your name" compact />
+    <section className="mt-10 bg-[#e4ddd0] py-8" aria-label="Preview">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <form onSubmit={onSubmit} className="flex flex-col gap-3 lg:flex-row lg:items-center">
+          <p className="font-heading shrink-0 text-3xl tracking-tight">Preview</p>
+          <button
+            type="button"
+            onClick={onMine}
+            className="h-12 shrink-0 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
+          >
+            Run it for me
+          </button>
+          <span className="shrink-0 text-sm text-[#6f685e]">or</span>
+          <ProfileField
+            inputRef={inputRef}
+            url={url}
+            onChange={onChange}
+            placeholder="Paste the LinkedIn profile you'd like to check"
+          />
+          <button
+            type="submit"
+            disabled={loading || url.trim().length === 0}
+            className="h-12 shrink-0 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
+          >
+            {loading ? "Pulling posts…" : "Run it"}
+          </button>
+        </form>
+        {mineHint && (
+          <p className="mt-3 text-sm leading-6 text-[#5c564c]">
+            LinkedIn opened your profile. Copy that address and paste it here.
+          </p>
+        )}
+
+        <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,680px)_300px]" aria-hidden="true">
+          <div className="space-y-3">
+            <PostCard
+              post={PREVIEW_POSTS[0]}
+              name={PREVIEW_NAME}
+              card={{ phase: "ready", features: PREVIEW_FEATURES, model: MODEL_ID, latencyMs: 640 }}
+              mode="focus"
+              index={1}
+              total={20}
+            />
+            <PostCard post={PREVIEW_POSTS[1]} name={PREVIEW_NAME} card={{ phase: "ready", features: PREVIEW_FEATURES, model: MODEL_ID, latencyMs: 640 }} mode="settled" />
           </div>
+          <aside className="h-fit rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
+            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Post 2 of 20</p>
+            <SlopDial score={64} band={band} judged={2} total={20} pending={0} read={1} skim={1} pass={0} />
+            <p className="font-heading mt-4 text-center text-lg leading-7 italic">Something specific, and it wasn&apos;t already obvious.</p>
+          </aside>
         </div>
-        <aside className="h-fit rounded-[28px] bg-[#fffdf8]/90 p-5 ring-1 ring-[#e7dfd2]">
-          <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Post 2 of 20</p>
-          <SlopDial score={64} band={band} judged={2} total={20} pending={1} read={1} skim={1} pass={0} />
-          <p className="font-heading mt-4 text-center text-lg leading-7 italic">The score moves as each post lands.</p>
-        </aside>
       </div>
     </section>
   );
