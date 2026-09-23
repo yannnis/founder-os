@@ -698,7 +698,7 @@ function PostCard({
           {" · "}
           {ago(row.createdUtc)}
         </p>
-        {flair ? <FlairChip label={label} name={flair} detail={why || ""} pulse={waiting} /> : null}
+        {flair ? <FlairChip label={label} name={flair} detail={row.phase === "done" ? "" : why || ""} pulse={waiting} /> : null}
       </div>
       <h3 className="title">
         <a href={row.permalink} target="_blank" rel="noreferrer">
