@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from "react";
 
 import { LinkedInPost } from "@/components/linkedin-post";
-import { auditBreakdown, RoastSummary } from "@/components/roast-summary";
+import { JevCard, RoastSubscribe, auditBreakdown, jevLines, summaryPills } from "@/components/roast-summary";
 import { SlopDial } from "@/components/slop-dial";
 import { Button } from "@/components/ui/button";
 import { WorthBar, type ReadyReading } from "@/components/worth-bar";
@@ -12,7 +12,7 @@ import type { PublicPost } from "@/lib/linkedin/posts";
 import { LINKEDIN_PROFILE, PROFILE_PHOTO, SUBSTACK_PROFILE } from "@/lib/site/constants";
 import { MODEL_ID } from "@/lib/slop/rubric";
 import type { ClassifyResponse } from "@/lib/slop/types";
-import { THIN_REASON, bandFor, bucketOf, postReason, tallyOf, type Contribution, type WorthFeatures } from "@/lib/slop/worth";
+import { THIN_REASON, bandFor, bucketOf, postReason, tallyOf, type Contribution, type Tally, type WorthFeatures } from "@/lib/slop/worth";
 
 type Phase = "idle" | "reading" | "thin" | "repost" | "error" | "ready";
 
@@ -221,7 +221,7 @@ export function RoastPage() {
             <button
               type="submit"
               disabled={loading || url.trim().length === 0}
-              className="h-12 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
+              className="h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
             >
               {loading ? "Pulling posts…" : "Read another"}
             </button>
@@ -258,8 +258,22 @@ export function RoastPage() {
       )}
 
       {scan && (
-        <main className="mx-auto mt-8 grid max-w-6xl gap-8 px-4 pb-28 sm:px-6 md:grid-cols-[minmax(0,680px)_300px]">
-          <section className="order-2 space-y-3 md:order-1">
+        <main className="mx-auto mt-4 max-w-6xl px-4 pb-28 sm:px-6">
+          {done && (
+            <div className="sticky top-0 z-30 -mx-4 mb-6 bg-[#f3eee4]/92 px-4 pt-2 pb-4 backdrop-blur-md">
+              <div className="grid items-stretch gap-4 md:grid-cols-[minmax(240px,340px)_minmax(0,1fr)]">
+                <ScorePanel
+                  label={`All ${posts.length}`}
+                  tally={tally}
+                  pending={0}
+                />
+                <JevCard lines={jevLines(tally, breakdown)} pills={summaryPills(tally, breakdown, posts.length)} />
+              </div>
+            </div>
+          )}
+
+          <div className={`grid gap-8 ${done ? "" : "md:grid-cols-[minmax(0,680px)_300px]"}`}>
+          <section className={`space-y-3 ${done ? "" : "order-2 md:order-1"}`}>
             {posts.slice(0, focus).map((post) => (
               <PostCard
                 key={post.id}
@@ -300,36 +314,24 @@ export function RoastPage() {
                 {posts.length - focus - 1 - ahead.length} still out of focus
               </p>
             )}
-
-            {done && <RoastSummary tally={tally} breakdown={breakdown} total={posts.length} />}
           </section>
 
+          {!done && (
           <aside className="order-1 md:sticky md:top-4 md:order-2 md:self-start">
-            <section className="rounded-[28px] bg-[#fffdf8]/90 p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2] backdrop-blur-md">
-              <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">
-                {done ? `All ${posts.length}` : `Post ${focus + 1} of ${posts.length}`}
-              </p>
-              <SlopDial
-                score={tally.score}
-                band={tally.band}
-                judged={tally.judged}
-                total={tally.total}
-                pending={posts.filter((post) => cards[post.id]?.phase === "reading").length}
-                read={tally.read}
-                skim={tally.skim}
-                pass={tally.pass}
-              />
-              {tally.skipped > 0 ? (
-                <p className="mt-3 text-center text-xs text-[#6f685e]">{tally.skipped} reposts left out</p>
-              ) : null}
-              {(tally.judged > 0 || done) && (
-                <p className="font-heading mt-4 text-center text-lg leading-7 italic">{tally.roast}</p>
-              )}
-              <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">
-                Pass counts whole, skim counts half. {MODEL_ID}.
-              </p>
-            </section>
+            <ScorePanel
+              label={`Post ${focus + 1} of ${posts.length}`}
+              tally={tally}
+              pending={posts.filter((post) => cards[post.id]?.phase === "reading").length}
+              roast={tally.judged > 0 ? tally.roast : undefined}
+            />
           </aside>
+          )}
+          </div>
+          {done && (
+            <div className="mt-8">
+              <RoastSubscribe />
+            </div>
+          )}
         </main>
       )}
 
@@ -369,6 +371,39 @@ export function RoastPage() {
   );
 }
 
+function ScorePanel({
+  label,
+  tally,
+  pending,
+  roast,
+}: {
+  label: string;
+  tally: Tally & { total: number };
+  pending: number;
+  roast?: string;
+}) {
+  return (
+    <section className="h-full rounded-[28px] bg-[#fffdf8]/90 p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2] backdrop-blur-md">
+      <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">{label}</p>
+      <SlopDial
+        score={tally.score}
+        band={tally.band}
+        judged={tally.judged}
+        total={tally.total}
+        pending={pending}
+        read={tally.read}
+        skim={tally.skim}
+        pass={tally.pass}
+      />
+      {tally.skipped > 0 ? (
+        <p className="mt-3 text-center text-xs text-[#6f685e]">{tally.skipped} reposts left out</p>
+      ) : null}
+      {roast ? <p className="font-heading mt-4 text-center text-lg leading-7 italic">{roast}</p> : null}
+      <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">Pass counts whole, skim counts half. {MODEL_ID}.</p>
+    </section>
+  );
+}
+
 function ProfileField({
   inputRef,
   url,
@@ -399,45 +434,12 @@ function ProfileField({
   );
 }
 
-const PREVIEW_NAME = "Jordan Hale";
-
-const PREVIEW_FEATURES: WorthFeatures = {
-  specific: 0.9,
-  fresh: 0.86,
-  bait: 0.04,
-  promo: 0.08,
-  empty: 0.06,
-  funny: 0.12,
-};
-
-const PREVIEW_POSTS: PublicPost[] = [
-  {
-    id: "preview-1",
-    text: "We rewrote onboarding last week. The old flow asked for company size before it asked for a name. Support tickets about “I never got in” dropped the next morning.",
-    repost: false,
-    time: "2d",
-    headline: "Product at a company you have heard of",
-    avatar: null,
-    reactions: 86,
-    comments: 14,
-    reposts: 3,
-    media: null,
-    quoted: null,
-  },
-  {
-    id: "preview-2",
-    text: "Three customers said the same thing on calls this month. They don’t want another dashboard. They want the one number that changed since last Tuesday.",
-    repost: false,
-    time: "5d",
-    headline: "Product at a company you have heard of",
-    avatar: null,
-    reactions: 41,
-    comments: 6,
-    reposts: 1,
-    media: null,
-    quoted: null,
-  },
+const PREVIEW_LINES = [
+  "18 of 20 posts were worth reading.",
+  "I went looking for junk. I could not find much. I am suspicious.",
 ];
+
+const PREVIEW_PILLS = ["18 Read", "1 Skim", "1 Pass", "20 posts"];
 
 function ResultPreview({
   url,
@@ -456,57 +458,47 @@ function ResultPreview({
   onSubmit: (event: FormEvent) => void;
   onMine: () => void;
 }) {
-  const band = bandFor(64);
+  const band = bandFor(8);
   return (
-    <section className="mt-10 bg-[#e4ddd0] py-8" aria-label="Preview">
+    <section
+      className={`mt-8 transition-opacity duration-500 ${loading ? "pointer-events-none opacity-40" : "opacity-100"}`}
+      aria-label="Preview"
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <form onSubmit={onSubmit} className="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <p className="font-heading shrink-0 text-3xl tracking-tight">Preview</p>
-          <button
-            type="button"
-            onClick={onMine}
-            className="h-12 shrink-0 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
-          >
-            Run it for me
-          </button>
-          <span className="shrink-0 text-sm text-[#6f685e]">or</span>
-          <ProfileField
-            inputRef={inputRef}
-            url={url}
-            onChange={onChange}
-            placeholder="Paste the LinkedIn profile you'd like to check"
-          />
-          <button
-            type="submit"
-            disabled={loading || url.trim().length === 0}
-            className="h-12 shrink-0 rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:opacity-50"
-          >
-            {loading ? "Pulling posts…" : "Run it"}
-          </button>
-        </form>
-        {mineHint && (
-          <p className="mt-3 text-sm leading-6 text-[#5c564c]">
-            LinkedIn opened your profile. Copy that address and paste it here.
-          </p>
-        )}
-
-        <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,680px)_300px]" aria-hidden="true">
-          <div className="space-y-3">
-            <PostCard
-              post={PREVIEW_POSTS[0]}
-              name={PREVIEW_NAME}
-              card={{ phase: "ready", features: PREVIEW_FEATURES, model: MODEL_ID, latencyMs: 640 }}
-              mode="focus"
-              index={1}
-              total={20}
+        <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(220px,320px)_minmax(0,1fr)]">
+          <form onSubmit={onSubmit} className="flex h-full flex-col gap-3 rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
+            <button
+              type="button"
+              onClick={onMine}
+              className="h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
+            >
+              Run it for me
+            </button>
+            <span className="text-sm text-[#6f685e]">or paste a profile</span>
+            <ProfileField
+              inputRef={inputRef}
+              url={url}
+              onChange={onChange}
+              placeholder="Paste the LinkedIn profile you'd like to check"
             />
-            <PostCard post={PREVIEW_POSTS[1]} name={PREVIEW_NAME} card={{ phase: "ready", features: PREVIEW_FEATURES, model: MODEL_ID, latencyMs: 640 }} mode="settled" />
-          </div>
-          <aside className="h-fit rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
-            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Post 2 of 20</p>
-            <SlopDial score={64} band={band} judged={2} total={20} pending={0} read={1} skim={1} pass={0} />
-            <p className="font-heading mt-4 text-center text-lg leading-7 italic">Something specific, and it wasn&apos;t already obvious.</p>
-          </aside>
+            <button
+              type="submit"
+              disabled={loading || url.trim().length === 0}
+              className="mt-auto h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
+            >
+              {loading ? "Pulling posts…" : "Run it"}
+            </button>
+            {mineHint && (
+              <p className="text-sm leading-6 text-[#5c564c]">
+                LinkedIn opened your profile. Copy that address and paste it here.
+              </p>
+            )}
+          </form>
+          <section className="rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
+            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Preview</p>
+            <SlopDial score={8} band={band} judged={20} total={20} pending={0} read={18} skim={1} pass={1} />
+          </section>
+          <JevCard lines={PREVIEW_LINES} pills={PREVIEW_PILLS} />
         </div>
       </div>
     </section>

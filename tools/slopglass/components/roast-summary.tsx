@@ -55,7 +55,7 @@ export function auditBreakdown(posts: Post[], cards: Record<string, CardState>):
   return { bait, empty, promo, thin, reposts };
 }
 
-function jevLines(tally: Tally, breakdown: AuditBreakdown): string[] {
+export function jevLines(tally: Tally, breakdown: AuditBreakdown): string[] {
   const lines: string[] = [];
   const { judged, read, band } = tally;
   if (judged === 0) return lines;
@@ -90,30 +90,20 @@ function Pill({ children }: { children: ReactNode }) {
   );
 }
 
-export function RoastSummary({
-  tally,
-  breakdown,
-  total,
-}: {
-  tally: Tally;
-  breakdown: AuditBreakdown;
-  total: number;
-}) {
-  const lines = jevLines(tally, breakdown);
-  const pills: string[] = [
-    `${tally.read} Read`,
-    `${tally.skim} Skim`,
-    `${tally.pass} Pass`,
-  ];
+export function summaryPills(tally: Tally, breakdown: AuditBreakdown, total: number): string[] {
+  const pills = [`${tally.read} Read`, `${tally.skim} Skim`, `${tally.pass} Pass`];
   if (breakdown.bait > 0) pills.push(`${breakdown.bait} asked for replies`);
   if (breakdown.empty > 0) pills.push(`${breakdown.empty} empty words`);
   if (breakdown.promo > 0) pills.push(`${breakdown.promo} promos`);
   if (breakdown.thin > 0) pills.push(`${breakdown.thin} too short`);
   if (breakdown.reposts > 0) pills.push(`${breakdown.reposts} reposts skipped`);
   pills.push(`${total} posts · ${MODEL_ID}`);
+  return pills;
+}
 
+export function JevCard({ lines, pills }: { lines: string[]; pills: string[] }) {
   return (
-    <section className="rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
+    <section className="flex h-full flex-col rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
       <div className="space-y-3">
         {lines.map((line) => (
           <p key={line} className="rounded-[18px] bg-[#f6f1e6] px-4 py-3 text-sm leading-6 text-[#1c1915]">
@@ -121,19 +111,20 @@ export function RoastSummary({
           </p>
         ))}
       </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-auto flex flex-wrap gap-2 pt-5">
         {pills.map((pill) => (
           <Pill key={pill}>{pill}</Pill>
         ))}
       </div>
-
-      <div className="mt-5">
-        <SubstackSubscribe
-          title="Get posts worth reading"
-          description="Stories from building and selling Moosend, plus what I am learning about SaaS, growth, and AI. One email when I publish."
-        />
-      </div>
     </section>
+  );
+}
+
+export function RoastSubscribe() {
+  return (
+    <SubstackSubscribe
+      title="Get posts worth reading"
+      description="Stories from building and selling Moosend, plus what I am learning about SaaS, growth, and AI. One email when I publish."
+    />
   );
 }
