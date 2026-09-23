@@ -41,17 +41,17 @@ test("a thin observation that is not bait or empty is a skim", () => {
 });
 
 test("dial bands sit on the published edges", () => {
-  assert.equal(bandFor(0).label, "Worth following");
-  assert.equal(bandFor(35).label, "Worth following");
-  assert.equal(bandFor(35.4).label, "Worth following");
-  assert.equal(bandFor(36).label, "Actually decent");
+  assert.equal(bandFor(0).label, "It's over");
+  assert.equal(bandFor(17).label, "It's over");
+  assert.equal(bandFor(17.4).label, "It's over");
+  assert.equal(bandFor(18).label, "Slop");
+  assert.equal(bandFor(29).label, "Slop");
+  assert.equal(bandFor(30).label, "Mid");
+  assert.equal(bandFor(49).label, "Mid");
   assert.equal(bandFor(50).label, "Actually decent");
-  assert.equal(bandFor(51).label, "Mid");
-  assert.equal(bandFor(70).label, "Mid");
-  assert.equal(bandFor(71).label, "Slop");
-  assert.equal(bandFor(82).label, "Slop");
-  assert.equal(bandFor(83).label, "It's over");
-  assert.equal(bandFor(100).label, "It's over");
+  assert.equal(bandFor(64).label, "Actually decent");
+  assert.equal(bandFor(65).label, "Worth following");
+  assert.equal(bandFor(100).label, "Worth following");
 });
 
 test("score counts a pass as whole and a skim as half", () => {
@@ -68,7 +68,7 @@ test("score counts a pass as whole and a skim as half", () => {
   assert.equal(tally.pass, 1);
   assert.equal(tally.skim, 2);
   assert.equal(tally.read, 2);
-  assert.equal(tally.score, 40);
+  assert.equal(tally.score, 60);
   assert.equal(tally.band?.label, "Actually decent");
 });
 

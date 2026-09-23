@@ -33,15 +33,16 @@ export function LeadScore({
   pending: number;
 }) {
   const score = leadScore(leads, judged);
-  const band: LeadBand | null = score === null ? null : bandFor(score);
+  const shown = score === null ? null : Math.round(score);
+  const band: LeadBand | null = shown === null ? null : bandFor(shown);
   const tone = band ? BAND_COLOR[band.id] : "#8a8175";
-  const turn = score === null ? 0 : -90 + (score / 100) * 180;
+  const turn = shown === null ? 0 : -90 + (shown / 100) * 180;
 
   return (
     <section className="panel score">
       <p className="eyebrow">The score</p>
       <figure className="dial">
-        <svg viewBox="0 0 200 118" role="img" aria-label={band ? `${leads} leads. ${band.label}` : "No score yet"}>
+        <svg viewBox="0 0 200 118" role="img" aria-label={band ? `${shown}. ${band.label}` : "No score yet"}>
           {LEAD_BANDS.map((item) => (
             <path key={item.id} d={wedge(item.min + 0.6, item.max - 0.4)} fill={BAND_COLOR[item.id]} opacity={!band || band.id === item.id ? 1 : 0.28} />
           ))}
@@ -53,7 +54,7 @@ export function LeadScore({
         </svg>
         <figcaption>
           <p className="score-num" style={{ color: tone }}>
-            {leads}
+            {shown === null ? "—" : shown}
           </p>
           <p className="score-label">{band ? band.label : "Waiting on the first post"}</p>
           <p className="score-meta">

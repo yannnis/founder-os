@@ -3,8 +3,8 @@
  * those probabilities into Read, Skim, or Skip. It does not import the SDK,
  * so the browser can apply the same buckets.
  *
- * Score = (Skip + 0.5 × Skim) / posts read. That is the share that was not
- * worth reading. Reposts are not in the denominator. A post under 40
+ * Score = (Read + 0.5 × Skim) / posts read. A high score is a timeline
+ * worth following. Reposts are not in the denominator. A post under 40
  * characters is a Skim and never gets a question.
  *
  * Gates were set against scripts/worth-calibration.json.
@@ -183,11 +183,11 @@ export type Band = {
 };
 
 export const BANDS: Band[] = [
-  { id: "back", label: "Worth following", min: 0, max: 35 },
-  { id: "decent", label: "Actually decent", min: 36, max: 50 },
-  { id: "mid", label: "Mid", min: 51, max: 70 },
-  { id: "slop", label: "Slop", min: 71, max: 82 },
-  { id: "over", label: "It's over", min: 83, max: 100 },
+  { id: "over", label: "It's over", min: 0, max: 17 },
+  { id: "slop", label: "Slop", min: 18, max: 29 },
+  { id: "mid", label: "Mid", min: 30, max: 49 },
+  { id: "decent", label: "Actually decent", min: 50, max: 64 },
+  { id: "back", label: "Worth following", min: 65, max: 100 },
 ];
 
 export function bandFor(score: number): Band {
@@ -250,7 +250,7 @@ export function tallyOf(items: Contribution[]): Tally {
           : "Nothing on screen was long enough to read.",
     };
   }
-  const score = (100 * (pass + 0.5 * skim)) / judged;
+  const score = (100 * (read + 0.5 * skim)) / judged;
   return {
     read,
     skim,
@@ -269,7 +269,7 @@ function roastLine(score: number, skipped: number, judged: number, weak: WorthFe
   const skipNote =
     skipped > 0 ? ` ${skipped} repost${skipped === 1 ? "" : "s"} stayed out of the score.` : "";
   if (band.id === "back") {
-    return `Under 35 is uncommon. ${judged} posts, and a reader could stay for most of them.${skipNote}`;
+    return `Over 65 is uncommon. ${judged} posts, and a reader could stay for most of them.${skipNote}`;
   }
   if (habit === "bait") {
     return `The posts that fail are collecting replies. Stop asking and say the thing.${skipNote}`;

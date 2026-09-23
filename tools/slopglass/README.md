@@ -11,7 +11,7 @@ There are two totals:
 
 The judgment comes from [Jev](https://docs.typesafe.ai), TypeSafe’s System One model. Jev answers six yes-or-no questions. The bucket is those answers, composed in code. It does not guess whether a model wrote the post, and likes do not move the score.
 
-The dial runs green on the left to red on the right: Worth following (0–35), Actually decent (36–50), Mid (51–70), Slop (71–82), It’s over (83–100).
+The dial runs red on the left to green on the right: It’s over (0–17), Slop (18–29), Mid (30–49), Actually decent (50–64), Worth following (65–100).
 
 ## Run it
 

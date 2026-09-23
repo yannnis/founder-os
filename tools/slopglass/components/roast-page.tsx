@@ -428,7 +428,7 @@ function ScorePanel({
         <p className="mt-3 text-center text-xs text-[#6f685e]">{tally.skipped} reposts left out</p>
       ) : null}
       {roast ? <p className="font-heading mt-4 text-center text-lg leading-7 italic">{roast}</p> : null}
-      <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">Skip counts whole, skim counts half. {MODEL_ID}.</p>
+      <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">Read counts whole, skim counts half. {MODEL_ID}.</p>
     </section>
   );
 }
@@ -553,8 +553,8 @@ const PREVIEW_TALLY: Tally & { total: number } = {
   pass: 2,
   judged: 20,
   skipped: 0,
-  score: 20,
-  band: bandFor(20),
+  score: 80,
+  band: bandFor(80),
   roast: "",
   total: 20,
 };
