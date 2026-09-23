@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent, type Ref } from "react";
 
 import { JevSummary, LeadScore } from "./score";
 import { jevLines } from "../lib/score";
@@ -86,6 +86,9 @@ export function RedditFeed() {
   }, []);
   const rowsRef = useRef(rows);
   const briefRef = useRef(brief);
+  const focusNode = useRef<HTMLElement | null>(null);
+  const resultsRef = useRef<HTMLElement | null>(null);
+  const following = useRef(false);
   rowsRef.current = rows;
   briefRef.current = brief;
 
@@ -255,6 +258,7 @@ export function RedditFeed() {
   async function runFeed(names: string[]) {
     if (names.length === 0 || briefRef.current.trim().length < 40) return;
     setStep("feed");
+    following.current = false;
     document.title = pageTitle || names.map((name) => `r/${name}`).join(", ");
     const gen = ++loadGeneration.current;
     qualifyGeneration.current += 1;
@@ -371,7 +375,27 @@ export function RedditFeed() {
   }
 
   const shown = visible(rows);
+  const readingId =
+    step === "feed" ? (shown.find((row) => row.phase === "judging" || row.phase === "queued")?.id ?? null) : null;
   const progress = step === "subs" ? 2 : step === "feed" ? 3 : 1;
+
+  useEffect(() => {
+    if (!readingId || !following.current) return;
+    focusNode.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [readingId]);
+
+  useEffect(() => {
+    const node = resultsRef.current;
+    if (step !== "feed" || !node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        following.current = entry.intersectionRatio < 0.35;
+      },
+      { threshold: [0, 0.35, 1] },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [step, shown.length]);
   const suggestionReady = suggestion !== "" && !subreddits.some((name) => name.toLowerCase() === suggestion.toLowerCase());
 
   if (step !== "feed") {
@@ -567,7 +591,7 @@ export function RedditFeed() {
         </button>
         {feedError ? <p className="alert">{feedError}</p> : null}
       </header>
-      <main className="wrap results">
+      <main ref={resultsRef} className="wrap results">
         <aside className="results-side">
           <LeadScore
             leads={rows.filter((row) => row.label === "lead").length}
@@ -619,7 +643,13 @@ export function RedditFeed() {
               </div>
             ) : null}
             {shown.map((row) => (
-              <PostCard key={row.id} row={row} matching={brief.trim().length >= 40} onRetry={() => retry(row)} />
+              <PostCard
+                key={row.id}
+                row={row}
+                matching={brief.trim().length >= 40}
+                onRetry={() => retry(row)}
+                nodeRef={row.id === readingId ? focusNode : undefined}
+              />
             ))}
           </div>
           {!loading && rows.length > 0 ? (
@@ -642,14 +672,24 @@ function submitOnEnter(event: KeyboardEvent<HTMLTextAreaElement>) {
   }
 }
 
-function PostCard({ row, matching, onRetry }: { row: Row; matching: boolean; onRetry: () => void }) {
+function PostCard({
+  row,
+  matching,
+  onRetry,
+  nodeRef,
+}: {
+  row: Row;
+  matching: boolean;
+  onRetry: () => void;
+  nodeRef?: Ref<HTMLElement>;
+}) {
   const waiting = matching && (row.phase === "queued" || row.phase === "judging");
   const flair = row.phase === "done" && row.label ? FLAIR[row.label] : row.phase === "error" ? "Missed" : waiting ? "Reading" : "";
   const label = row.phase === "done" && row.label ? row.label : row.phase === "error" ? "error" : "reading";
   const why = row.phase === "done" ? row.reason : row.phase === "error" ? row.error : waiting ? "Jev is reading this post." : "";
   const live = waiting || row.phase === "error";
   return (
-    <article className="card" data-mode={live ? "focus" : "settled"}>
+    <article ref={nodeRef} className="card" data-mode={live ? "focus" : "settled"}>
       <div className="card-top">
         <p className="meta">
           <strong>r/{row.subreddit}</strong>
