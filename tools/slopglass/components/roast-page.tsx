@@ -312,8 +312,10 @@ export function RoastPage() {
             <MiniScore tally={tally} latest={lines[0] ?? messages[messages.length - 1]?.text} />
           )}
 
-          <p className="mx-auto mt-10 mb-3 max-w-[680px] text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
-          <section className="mx-auto max-w-[680px] space-y-3">
+          <div className="mt-10 grid items-start gap-6 lg:grid-cols-[minmax(0,680px)_minmax(300px,1fr)]">
+          <div>
+          <p className="mb-3 text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
+          <section className="space-y-3">
             {posts.slice(0, focus).map((post) => (
               <PostCard
                 key={post.id}
@@ -355,12 +357,12 @@ export function RoastPage() {
               </p>
             )}
           </section>
+          </div>
 
-          {done && (
-            <div className="mx-auto mt-8 max-w-[680px]">
-              <RoastSubscribe />
-            </div>
-          )}
+          <aside className="lg:sticky lg:top-24 lg:mt-7">
+            <RoastSubscribe />
+          </aside>
+          </div>
         </main>
       )}
 
