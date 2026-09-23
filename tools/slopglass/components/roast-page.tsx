@@ -169,7 +169,7 @@ export function RoastPage() {
   }, [scan]);
 
   function openMine() {
-    window.open("https://www.linkedin.com/public-profile/settings", "_blank", "noopener,noreferrer");
+    window.open("https://www.linkedin.com/in/me/", "_blank", "noopener,noreferrer");
     setMineHint(true);
     window.setTimeout(() => profileInput.current?.focus(), 0);
   }
@@ -506,11 +506,11 @@ function ResultPreview({
         <button type="button" onClick={onMine} className="cursor-pointer text-[#1c1915] underline underline-offset-4">
           Open the page where LinkedIn shows it
         </button>
-        . Copy the link in the box. Or just type your name.
+        . Copy the link from the address bar. Or just type your name.
       </p>
       {mineHint && (
         <p className="mt-1 text-sm leading-6 text-[#1f6b45]">
-          LinkedIn opened the page with your profile link. Copy the link that starts with linkedin.com/in and paste it here.
+          LinkedIn opened your profile. Copy the linkedin.com/in link from the address bar and paste it here.
         </p>
       )}
 
