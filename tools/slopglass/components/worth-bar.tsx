@@ -58,11 +58,17 @@ export function WorthBar({
   const reason = postReason(reading.features, bucket);
 
   return (
-    <span className="inline-flex flex-col items-end gap-2">
+    <span
+      className="relative inline-flex flex-col items-end"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+    >
       <button
         type="button"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => setOpen(true)}
         className={`worth-chip inline-flex max-w-full items-center gap-2 rounded-full py-1.5 pr-3 pl-2.5 text-left text-sm ${TONE[bucket]}`}
       >
         <span className="size-2 shrink-0 rounded-full bg-current" />
@@ -70,7 +76,8 @@ export function WorthBar({
         <span className="max-w-[220px] truncate text-[13px] opacity-80 sm:max-w-[280px]">{reason}</span>
       </button>
       {open && (
-        <div className="w-[min(100%,280px)] rounded-2xl border border-[#e7dfd2] bg-[#fffdf8] px-3 py-3 text-left shadow-[0_12px_30px_rgba(28,25,21,0.08)]">
+        <div className="absolute top-full right-0 z-30 w-[280px] pt-2">
+        <div className="rounded-2xl border border-[#e7dfd2] bg-[#fffdf8] px-3 py-3 text-left shadow-[0_18px_40px_rgba(28,25,21,0.16)]">
           <p className="text-[11px] tracking-[0.08em] text-[#6f685e] uppercase">
             {reading.model} · {reading.latencyMs}ms{reading.latencyMs === 0 ? " · cached" : ""}
           </p>
@@ -89,6 +96,7 @@ export function WorthBar({
               );
             })}
           </ul>
+        </div>
         </div>
       )}
     </span>
