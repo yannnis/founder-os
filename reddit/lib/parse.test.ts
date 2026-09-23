@@ -23,13 +23,12 @@ const ATOM = `<?xml version="1.0"?><feed>
 </entry>
 </feed>`;
 
-test("atom keeps self-post text and drops link-post footers", () => {
+test("atom keeps self-post text and drops posts with no body", () => {
   const posts = parseAtom(ATOM, "SaaS");
-  assert.equal(posts.length, 2);
+  assert.equal(posts.length, 1);
   assert.equal(posts[0].author, "Ada");
   assert.equal(posts[0].text, "I'm leaving Salesforce.");
   assert.equal(posts[0].id, "t3_abc");
-  assert.equal(posts[1].text, "");
   assert.equal(posts[0].createdUtc, Date.parse("2026-09-22T16:00:00+00:00") / 1000);
 });
 
@@ -61,7 +60,7 @@ test("archive rows become posts", () => {
   assert.equal(post?.text, "hello");
 });
 
-test("removed and deleted archive bodies are empty", () => {
+test("removed, deleted, locked, and empty posts are left out", () => {
   const removed = fromArchive(
     { id: "rm", title: "Gone", author: "Ada", selftext: "[removed]", created_utc: 10, subreddit: "SaaS" },
     "SaaS",
@@ -70,11 +69,34 @@ test("removed and deleted archive bodies are empty", () => {
     { id: "dl", title: "Gone", author: "Ada", selftext: "  [deleted]  ", created_utc: 10, subreddit: "SaaS" },
     "SaaS",
   );
-  assert.equal(removed?.text, "");
-  assert.equal(deleted?.text, "");
-  assert.equal(removed?.title, "Gone");
+  const locked = fromArchive(
+    { id: "lk", title: "Closed", author: "Ada", selftext: "still here", created_utc: 10, locked: true, subreddit: "SaaS" },
+    "SaaS",
+  );
+  const blocked = fromArchive(
+    {
+      id: "bl",
+      title: "Held",
+      author: "Ada",
+      selftext: "still here",
+      created_utc: 10,
+      removed_by_category: "moderator",
+      subreddit: "SaaS",
+    },
+    "SaaS",
+  );
+  const empty = fromArchive(
+    { id: "em", title: "No body", author: "Ada", selftext: "   ", created_utc: 10, subreddit: "SaaS" },
+    "SaaS",
+  );
+  assert.equal(removed, null);
+  assert.equal(deleted, null);
+  assert.equal(locked, null);
+  assert.equal(blocked, null);
+  assert.equal(empty, null);
 });
 
-test("body extractor ignores a missing markdown div", () => {
+test("body extractor ignores a missing markdown div and a removed marker", () => {
   assert.equal(bodyFromContent("&amp;#32; submitted by"), "");
+  assert.equal(bodyFromContent('&lt;div class="md"&gt;&lt;p&gt;[removed]&lt;/p&gt;&lt;/div&gt;'), "");
 });

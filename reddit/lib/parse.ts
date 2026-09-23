@@ -27,11 +27,13 @@ export function parseAtom(xml: string, subreddit: string): RedditPost[] {
     const author = authorOf(textOf(entry, "name"));
     const createdUtc = Date.parse(updated);
     if (!title || !id || !href || !Number.isFinite(createdUtc)) continue;
+    const text = bodyFromContent(innerOf(entry, "content"));
+    if (!text) continue;
     posts.push({
       id,
       title: decodeXml(title).trim(),
       author,
-      text: bodyFromContent(innerOf(entry, "content")),
+      text,
       createdUtc: Math.floor(createdUtc / 1000),
       permalink: decodeXml(href),
       subreddit,
@@ -48,26 +50,33 @@ type ArchiveRow = {
   created_utc?: unknown;
   permalink?: unknown;
   subreddit?: unknown;
+  locked?: unknown;
+  spam?: unknown;
+  removed_by_category?: unknown;
 };
 
 export function fromArchive(row: ArchiveRow, fallbackSubreddit: string): RedditPost | null {
+  if (row.locked === true || row.spam === true) return null;
+  if (typeof row.removed_by_category === "string" && row.removed_by_category.trim()) return null;
   if (typeof row.title !== "string" || typeof row.id !== "string") return null;
   const created = typeof row.created_utc === "number" ? row.created_utc : Number(row.created_utc);
   if (!Number.isFinite(created)) return null;
+  const text = archiveText(row.selftext);
+  if (!text) return null;
   const subreddit = typeof row.subreddit === "string" && row.subreddit ? row.subreddit : fallbackSubreddit;
   const permalink = permalinkOf(row.permalink, subreddit, row.id);
   return {
     id: row.id.startsWith("t3_") ? row.id : `t3_${row.id}`,
     title: row.title.trim(),
     author: authorOf(typeof row.author === "string" ? row.author : ""),
-    text: archiveText(row.selftext),
+    text,
     createdUtc: Math.floor(created),
     permalink,
     subreddit,
   };
 }
 
-/** Removed and deleted bodies are placeholders. Match the title instead of the marker. */
+/** Removed and deleted bodies are placeholders, not a post. */
 export function archiveText(selftext: unknown): string {
   if (typeof selftext !== "string") return "";
   const text = selftext.trim();
@@ -99,7 +108,7 @@ export function bodyFromContent(contentXml: string): string {
   const html = decodeXml(contentXml);
   const md = html.match(/<div class="md">([\s\S]*?)<\/div>/i);
   if (!md) return "";
-  return htmlToText(md[1]).slice(0, 8_000);
+  return archiveText(htmlToText(md[1]));
 }
 
 export function htmlToText(html: string): string {

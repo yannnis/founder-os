@@ -46,26 +46,14 @@ class PostsError extends Error {
 
 async function firstBatch(subreddit: string): Promise<RedditPost[]> {
   let posts: RedditPost[] = [];
+  let cursor: number | undefined;
   try {
     posts = await fromRss(subreddit);
+    cursor = oldestTime(posts);
   } catch (error) {
     if (error instanceof PostsError && error.missing) throw error;
-    posts = await fromArchivePage(subreddit);
   }
-  for (let page = 0; posts.length < FIRST_BATCH && page < 3; page += 1) {
-    const oldest = posts.reduce((min, post) => Math.min(min, post.createdUtc), Number.POSITIVE_INFINITY);
-    if (!Number.isFinite(oldest)) break;
-    let more: RedditPost[] = [];
-    try {
-      more = await fromArchivePage(subreddit, oldest);
-    } catch {
-      break;
-    }
-    const seen = new Set(posts.map((post) => post.id));
-    const fresh = more.filter((post) => !seen.has(post.id));
-    if (fresh.length === 0) break;
-    posts = posts.concat(fresh);
-  }
+  posts = await fillFromArchive(subreddit, posts, cursor);
   if (posts.length === 0) throw new PostsError(`Couldn't load posts from r/${subreddit}.`);
   return posts.slice(0, FIRST_BATCH);
 }
@@ -83,10 +71,35 @@ async function fromRss(subreddit: string): Promise<RedditPost[]> {
 }
 
 async function fromEarlier(subreddit: string, before: number): Promise<RedditPost[]> {
-  return fromArchivePage(subreddit, before);
+  return fillFromArchive(subreddit, [], before);
 }
 
-async function fromArchivePage(subreddit: string, before?: number): Promise<RedditPost[]> {
+const ARCHIVE_PAGES = 8;
+
+/** Keep reading older pages when a page is only locked or removed posts. */
+async function fillFromArchive(subreddit: string, posts: RedditPost[], before?: number): Promise<RedditPost[]> {
+  let cursor = before;
+  for (let page = 0; posts.length < FIRST_BATCH && page < ARCHIVE_PAGES; page += 1) {
+    let more: ArchivePage;
+    try {
+      more = await fromArchivePage(subreddit, cursor);
+    } catch {
+      break;
+    }
+    if (more.raw === 0 || more.oldest === null) break;
+    if (cursor !== undefined && more.oldest >= cursor) break;
+    const seen = new Set(posts.map((post) => post.id));
+    for (const post of more.posts) {
+      if (!seen.has(post.id)) posts.push(post);
+    }
+    cursor = more.oldest;
+  }
+  return posts;
+}
+
+type ArchivePage = { posts: RedditPost[]; oldest: number | null; raw: number };
+
+async function fromArchivePage(subreddit: string, before?: number): Promise<ArchivePage> {
   const url = new URL("https://arctic-shift.photon-reddit.com/api/posts/search");
   url.searchParams.set("subreddit", subreddit);
   url.searchParams.set("limit", String(FIRST_BATCH));
@@ -100,10 +113,27 @@ async function fromArchivePage(subreddit: string, before?: number): Promise<Redd
   const payload = (await response.json()) as { data?: unknown };
   if (!Array.isArray(payload.data)) throw new PostsError(`Couldn't load posts from r/${subreddit}.`);
   const posts: RedditPost[] = [];
+  let oldest: number | null = null;
+  let raw = 0;
   for (const row of payload.data) {
     if (!row || typeof row !== "object") continue;
+    raw += 1;
+    const created = rowTime(row);
+    if (created !== null) oldest = oldest === null ? created : Math.min(oldest, created);
     const post = fromArchive(row, subreddit);
     if (post && (before === undefined || post.createdUtc < before)) posts.push(post);
   }
-  return posts;
+  return { posts, oldest, raw };
+}
+
+function rowTime(row: object): number | null {
+  if (!("created_utc" in row)) return null;
+  const created = row.created_utc;
+  const value = typeof created === "number" ? created : Number(created);
+  return Number.isFinite(value) ? Math.floor(value) : null;
+}
+
+function oldestTime(posts: RedditPost[]): number | undefined {
+  if (posts.length === 0) return undefined;
+  return posts.reduce((min, post) => Math.min(min, post.createdUtc), Number.POSITIVE_INFINITY);
 }
