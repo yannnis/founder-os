@@ -34,6 +34,7 @@ export function SlopDial({
   read,
   skim,
   pass,
+  compact,
 }: {
   score: number | null;
   band: Band | null;
@@ -43,6 +44,7 @@ export function SlopDial({
   read: number;
   skim: number;
   pass: number;
+  compact?: boolean;
 }) {
   const shown = score === null ? null : Math.round(score);
   const armed = judged > 0 || shown !== null;
@@ -51,7 +53,7 @@ export function SlopDial({
 
   return (
     <figure className="m-0">
-      <svg viewBox="0 0 200 118" className="w-full" role="img" aria-label={band ? `${shown} percent. ${band.label}` : "No score yet"}>
+      <svg viewBox="0 0 200 118" className={compact ? "mx-auto w-36" : "w-full"} role="img" aria-label={band ? `${shown} percent. ${band.label}` : "No score yet"}>
         {BANDS.map((item) => (
           <path
             key={item.id}
@@ -75,19 +77,23 @@ export function SlopDial({
         <circle cx="100" cy="108" r="2.2" fill="#f6f1e6" />
       </svg>
       <figcaption className="-mt-3 text-center">
-        <p className="font-heading text-7xl leading-none tracking-tight tabular-nums" style={{ color: hub }}>
+        <p className={`font-heading leading-none tracking-tight tabular-nums ${compact ? "text-5xl" : "text-7xl"}`} style={{ color: hub }}>
           {shown === null ? "—" : shown}
         </p>
-        <p className="font-heading mt-1 text-xl italic">{band ? band.label : "Waiting on the first post"}</p>
-        <p className="mt-1 text-xs tracking-wide text-[#6f685e]">
-          {judged} of {total} scored
-          {pending > 0 ? ` · ${pending} still in flight` : ""}
-        </p>
+        <p className={`font-heading italic ${compact ? "mt-1 text-base" : "mt-1 text-xl"}`}>{band ? band.label : "Waiting on the first post"}</p>
+        {!compact && (
+          <p className="mt-1 text-xs tracking-wide text-[#6f685e]">
+            {judged} of {total} scored
+            {pending > 0 ? ` · ${pending} still in flight` : ""}
+          </p>
+        )}
+        {!compact && (
         <dl className="mt-4 grid grid-cols-3 gap-2 text-left">
           <Count label="Read" value={read} tone="#145236" />
           <Count label="Skim" value={skim} tone="#6d4708" />
           <Count label="Pass" value={pass} tone="#8d2a16" />
         </dl>
+        )}
       </figcaption>
     </figure>
   );

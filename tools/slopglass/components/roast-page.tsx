@@ -199,23 +199,12 @@ export function RoastPage() {
 
   return (
     <div className="stage min-h-full pb-28 text-[#1c1915]">
-      <header className={`mx-auto max-w-6xl px-4 sm:px-6 ${scan ? "pt-5" : "pt-10"}`}>
-        {scan ? (
+      {scan && (
+      <header className="mx-auto max-w-6xl px-4 pt-5 sm:px-6">
           <div className="mb-4">
             <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">linkedin.com/in/{scan.profile.slug}</p>
             <h1 className="font-heading text-4xl tracking-tight sm:text-5xl">{scan.profile.name}</h1>
           </div>
-        ) : (
-          <>
-            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">LinkedIn</p>
-            <h1 className="font-heading max-w-3xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-[#5c564c]">
-              The first 20 public posts, read one at a time. Nothing to install, and no LinkedIn login on this site.
-            </p>
-          </>
-        )}
-
-        {scan && (
           <form onSubmit={onSubmit} className="flex max-w-xl flex-col gap-3 sm:flex-row">
             <ProfileField inputRef={profileInput} url={url} onChange={setUrl} placeholder="linkedin.com/in/your-name" />
             <button
@@ -226,8 +215,8 @@ export function RoastPage() {
               {loading ? "Pulling posts…" : "Read another"}
             </button>
           </form>
-        )}
       </header>
+      )}
 
       {!scan && (
         <ResultPreview
@@ -434,13 +423,6 @@ function ProfileField({
   );
 }
 
-const PREVIEW_LINES = [
-  "18 of 20 posts were worth reading.",
-  "I went looking for junk. I could not find much. I am suspicious.",
-];
-
-const PREVIEW_PILLS = ["18 Read", "1 Skim", "1 Pass", "20 posts"];
-
 function ResultPreview({
   url,
   onChange,
@@ -461,47 +443,67 @@ function ResultPreview({
   const band = bandFor(8);
   return (
     <section
-      className={`mt-8 transition-opacity duration-500 ${loading ? "pointer-events-none opacity-40" : "opacity-100"}`}
+      className={`mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 pb-16 transition-opacity duration-500 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,440px)] ${loading ? "pointer-events-none opacity-40" : "opacity-100"}`}
       aria-label="Preview"
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(220px,280px)_minmax(220px,320px)_minmax(0,1fr)]">
-          <form onSubmit={onSubmit} className="flex h-full flex-col gap-3 rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
-            <button
-              type="button"
-              onClick={onMine}
-              className="h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
-            >
-              Run it for me
-            </button>
-            <span className="text-sm text-[#6f685e]">or paste a profile</span>
-            <ProfileField
-              inputRef={inputRef}
-              url={url}
-              onChange={onChange}
-              placeholder="Paste the LinkedIn profile you'd like to check"
-            />
-            <button
-              type="submit"
-              disabled={loading || url.trim().length === 0}
-              className="mt-auto h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
-            >
-              {loading ? "Pulling posts…" : "Run it"}
-            </button>
-            {mineHint && (
-              <p className="text-sm leading-6 text-[#5c564c]">
-                LinkedIn opened your profile. Copy that address and paste it here.
-              </p>
-            )}
-          </form>
-          <section className="rounded-[28px] bg-[#fffdf8] p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
-            <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Preview</p>
-            <SlopDial score={8} band={band} judged={20} total={20} pending={0} read={18} skim={1} pass={1} />
-          </section>
-          <JevCard lines={PREVIEW_LINES} pills={PREVIEW_PILLS} />
-        </div>
+      <div>
+        <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">LinkedIn</p>
+        <h1 className="font-heading mt-2 max-w-xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
+        <p className="mt-4 max-w-md text-sm leading-6 text-[#5c564c]">
+          The first 20 public posts, read one at a time. Nothing to install, and no LinkedIn login on this site.
+        </p>
+        <form onSubmit={onSubmit} className="mt-8 flex max-w-lg flex-col gap-3 sm:flex-row">
+          <ProfileField
+            inputRef={inputRef}
+            url={url}
+            onChange={onChange}
+            placeholder="linkedin.com/in/your-name"
+          />
+          <button
+            type="submit"
+            disabled={loading || url.trim().length === 0}
+            className="h-12 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
+          >
+            {loading ? "Pulling posts…" : "Run it"}
+          </button>
+        </form>
+        <button type="button" onClick={onMine} className="mt-3 cursor-pointer text-sm text-[#5c564c] underline underline-offset-4">
+          Run it for me
+        </button>
+        {mineHint && (
+          <p className="mt-3 max-w-md text-sm leading-6 text-[#5c564c]">
+            LinkedIn opened your profile. Copy that address and paste it here.
+          </p>
+        )}
       </div>
+
+      <aside className="rounded-[28px] bg-[#fffdf8] p-6 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
+        <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">A finished read</p>
+        <div className="mt-2 grid items-center gap-2 sm:grid-cols-[148px_minmax(0,1fr)]">
+          <SlopDial score={8} band={band} judged={20} total={20} pending={0} read={18} skim={1} pass={1} compact />
+          <div>
+            <p className="font-heading text-2xl leading-7 tracking-tight">18 of 20 posts were worth reading.</p>
+            <p className="mt-2 text-sm leading-6 text-[#5c564c]">I went looking for junk. I could not find much.</p>
+          </div>
+        </div>
+        <dl className="mt-4 grid grid-cols-3 gap-2">
+          <CountChip label="Read" value="18" tone="#145236" />
+          <CountChip label="Skim" value="1" tone="#6d4708" />
+          <CountChip label="Pass" value="0" tone="#8d2a16" />
+        </dl>
+      </aside>
     </section>
+  );
+}
+
+function CountChip({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded-2xl bg-[#f6f1e6] px-2 py-2 text-center">
+      <dt className="text-[10px] tracking-[0.14em] text-[#6f685e] uppercase">{label}</dt>
+      <dd className="font-heading text-2xl leading-none" style={{ color: tone }}>
+        {value}
+      </dd>
+    </div>
   );
 }
 
