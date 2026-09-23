@@ -2,7 +2,7 @@
 
 Slopglass answers one question about LinkedIn: how much of this is worth reading.
 
-Each post is **Read**, **Skim**, or **Pass**. The number on the dial is the share that was not worth it. A pass counts as a whole point, a skim counts as half, and a read counts as nothing. Reposts are skipped. A post shorter than 40 characters is a skim and is never sent to the model.
+Each post is **Read**, **Skim**, or **Skip**. The number on the dial is the share that was not worth it. A skip counts as a whole point, a skim counts as half, and a read counts as nothing. Reposts are skipped. A post shorter than 40 characters is a skim and is never sent to the model.
 
 There are two totals:
 

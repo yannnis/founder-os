@@ -1,9 +1,9 @@
 /**
  * Worth-reading policy. Jev answers six yes/no questions. This file turns
- * those probabilities into Read, Skim, or Pass. It does not import the SDK,
+ * those probabilities into Read, Skim, or Skip. It does not import the SDK,
  * so the browser can apply the same buckets.
  *
- * Score = (Pass + 0.5 × Skim) / posts read. That is the share that was not
+ * Score = (Skip + 0.5 × Skim) / posts read. That is the share that was not
  * worth reading. Reposts are not in the denominator. A post under 40
  * characters is a Skim and never gets a question.
  *
@@ -136,7 +136,7 @@ export const GATES = {
 export const BUCKET_COPY: Record<Bucket, { label: string; hint: string }> = {
   read: { label: "Read", hint: "A reader gets something out of this." },
   skim: { label: "Skim", hint: "A glance. The words don't carry much." },
-  pass: { label: "Pass", hint: "It wants something back, or it doesn't say anything." },
+  pass: { label: "Skip", hint: "It wants something back, or it doesn't say anything." },
 };
 
 export function bucketOf(features: WorthFeatures): Bucket {

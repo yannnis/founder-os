@@ -94,7 +94,7 @@ export function SlopDial({
         <dl className="mt-4 grid grid-cols-3 gap-2 text-left">
           <Count label="Read" value={read} tone="#145236" />
           <Count label="Skim" value={skim} tone="#6d4708" />
-          <Count label="Pass" value={pass} tone="#8d2a16" />
+          <Count label="Skip" value={pass} tone="#8d2a16" />
         </dl>
         )}
       </figcaption>

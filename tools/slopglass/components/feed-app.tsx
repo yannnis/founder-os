@@ -233,7 +233,7 @@ export function FeedApp() {
                   ["all", "All"],
                   ["read", "Read"],
                   ["skim", "Skim"],
-                  ["pass", "Pass"],
+                  ["pass", "Skip"],
                 ] as const
               ).map(([id, label]) => (
                 <button
@@ -294,7 +294,7 @@ export function FeedApp() {
             ) : null}
             <p className="font-heading mt-4 text-center text-lg leading-7 italic">{tally.roast}</p>
             <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">
-              Pass counts whole, skim counts half. Not likes, not followers. {MODEL_ID}.
+              Skip counts whole, skim counts half. Not likes, not followers. {MODEL_ID}.
             </p>
             <details className="mt-4 border-t border-[#efe6d8] pt-3">
               <summary className="cursor-pointer text-xs tracking-[0.14em] text-[#6f685e] uppercase">Six questions</summary>

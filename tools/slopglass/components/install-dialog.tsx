@@ -18,7 +18,7 @@ export function InstallDialog() {
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">Load the extension</DialogTitle>
           <DialogDescription>
-            Chrome, Edge, Brave, and Arc can load it unpacked. On LinkedIn it marks each post Read, Skim, or Pass, and a
+            Chrome, Edge, Brave, and Arc can load it unpacked. On LinkedIn it marks each post Read, Skim, or Skip, and a
             meter totals the scroll or the profile.
           </DialogDescription>
         </DialogHeader>

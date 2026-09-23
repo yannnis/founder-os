@@ -430,7 +430,7 @@ function ScorePanel({
         <p className="mt-3 text-center text-xs text-[#6f685e]">{tally.skipped} reposts left out</p>
       ) : null}
       {roast ? <p className="font-heading mt-4 text-center text-lg leading-7 italic">{roast}</p> : null}
-      <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">Pass counts whole, skim counts half. {MODEL_ID}.</p>
+      <p className="mt-3 text-center text-xs leading-5 text-[#6f685e]">Skip counts whole, skim counts half. {MODEL_ID}.</p>
     </section>
   );
 }
@@ -625,7 +625,7 @@ function MiniScore({ tally, latest }: { tally: Tally & { total: number }; latest
         <div className="min-w-0">
           <p className="font-heading text-base leading-5 italic">{tally.band ? tally.band.label : "Waiting on the first post"}</p>
           <p className="text-xs text-[#6f685e]">
-            {tally.read} read · {tally.skim} skim · {tally.pass} pass
+            {tally.read} read · {tally.skim} skim · {tally.pass} skip
           </p>
         </div>
         {latest && (

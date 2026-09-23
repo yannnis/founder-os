@@ -129,7 +129,7 @@ export type ChatMessage = {
 const BUCKET_TONE: Record<NonNullable<ChatMessage["bucket"]>, { label: string; className: string }> = {
   read: { label: "Read", className: "bg-[#e7f6ee] text-[#145236]" },
   skim: { label: "Skim", className: "bg-[#fbf3df] text-[#6d4708]" },
-  pass: { label: "Pass", className: "bg-[#fde8e2] text-[#8d2a16]" },
+  pass: { label: "Skip", className: "bg-[#fde8e2] text-[#8d2a16]" },
   thin: { label: "Skim", className: "bg-[#fbf3df] text-[#6d4708]" },
   repost: { label: "Repost", className: "bg-[#eee7db] text-[#5c564c]" },
   error: { label: "Missed", className: "bg-[#eee7db] text-[#8d2a16]" },
