@@ -11,6 +11,8 @@ test("accepts a public profile URL and a bare slug", () => {
   });
   assert.equal(linkedInProfile("  satyanadella ")?.url, "https://www.linkedin.com/in/satyanadella/");
   assert.equal(linkedInProfile("linkedin.com/in/ada/")?.slug, "ada");
+  assert.equal(linkedInProfile("Satya Nadella")?.slug, "satya-nadella");
+  assert.equal(linkedInProfile("https://ca.linkedin.com/in/ada")?.slug, "ada");
 });
 
 test("rejects anything that is not a personal profile", () => {

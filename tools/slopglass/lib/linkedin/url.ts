@@ -10,6 +10,15 @@ export function linkedInProfile(input: string): LinkedInProfile | null {
   const raw = input.trim();
   if (!raw || raw.length > 300) return null;
 
+  const fromName = nameToSlug(raw);
+  if (fromName) {
+    return {
+      url: `https://www.linkedin.com/in/${fromName}/`,
+      slug: fromName,
+      name: displayName(fromName),
+    };
+  }
+
   let candidate = raw;
   if (!/^https?:\/\//i.test(candidate)) {
     if (/^(www\.)?linkedin\.com\//i.test(candidate)) candidate = `https://${candidate}`;
@@ -26,7 +35,7 @@ export function linkedInProfile(input: string): LinkedInProfile | null {
   }
   if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
   const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
-  if (host !== "linkedin.com") return null;
+  if (host !== "linkedin.com" && !host.endsWith(".linkedin.com")) return null;
 
   const parts = parsed.pathname.split("/").filter(Boolean);
   if (parts[0]?.toLowerCase() !== "in" || !parts[1]) return null;
@@ -44,6 +53,15 @@ export function linkedInProfile(input: string): LinkedInProfile | null {
     slug,
     name: displayName(slug),
   };
+}
+
+function nameToSlug(raw: string): string | null {
+  if (/[/.]|https?:/i.test(raw)) return null;
+  const words = raw.split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 4) return null;
+  if (!words.every((word) => /^[\p{L}\p{N}']+$/u.test(word))) return null;
+  const slug = words.map((word) => word.replace(/'/g, "").toLowerCase()).join("-");
+  return SLUG.test(slug) ? slug : null;
 }
 
 function displayName(slug: string): string {

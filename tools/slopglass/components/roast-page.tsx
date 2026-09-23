@@ -170,7 +170,7 @@ export function RoastPage() {
   }, [scan]);
 
   function openMine() {
-    window.open("https://www.linkedin.com/in/me/", "_blank", "noopener,noreferrer");
+    window.open("https://www.linkedin.com/public-profile/settings", "_blank", "noopener,noreferrer");
     setMineHint(true);
     window.setTimeout(() => profileInput.current?.focus(), 0);
   }
@@ -493,7 +493,7 @@ function ResultPreview({
             inputRef={inputRef}
             url={url}
             onChange={onChange}
-            placeholder="Paste the LinkedIn profile you'd like to check"
+            placeholder="Your name, or linkedin.com/in/your-name"
           />
           <button
             type="submit"
@@ -504,14 +504,16 @@ function ResultPreview({
           </button>
       </form>
       <p className="mt-3 text-sm leading-6 text-[#5c564c]">
-        Don&apos;t know your LinkedIn profile URL?{" "}
+        Don&apos;t know the link?{" "}
         <button type="button" onClick={onMine} className="cursor-pointer text-[#1c1915] underline underline-offset-4">
-          Click here to go to LinkedIn
-        </button>{" "}
-        and copy what&apos;s in the address bar.
+          Open the page where LinkedIn shows it
+        </button>
+        . Copy the link in the box. Or just type your name.
       </p>
       {mineHint && (
-        <p className="mt-1 text-sm leading-6 text-[#1f6b45]">LinkedIn opened in a new tab. Copy the address and paste it above.</p>
+        <p className="mt-1 text-sm leading-6 text-[#1f6b45]">
+          LinkedIn opened the page with your profile link. Copy the link that starts with linkedin.com/in and paste it here.
+        </p>
       )}
 
       <div className={`mt-14 transition-opacity duration-500 ${loading ? "opacity-40" : "opacity-100"}`} aria-label="Preview">
