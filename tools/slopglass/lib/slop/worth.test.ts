@@ -41,9 +41,9 @@ test("a thin observation that is not bait or empty is a skim", () => {
 });
 
 test("dial bands sit on the published edges", () => {
-  assert.equal(bandFor(0).label, "We're so back");
-  assert.equal(bandFor(35).label, "We're so back");
-  assert.equal(bandFor(35.4).label, "We're so back");
+  assert.equal(bandFor(0).label, "Worth following");
+  assert.equal(bandFor(35).label, "Worth following");
+  assert.equal(bandFor(35.4).label, "Worth following");
   assert.equal(bandFor(36).label, "Actually decent");
   assert.equal(bandFor(50).label, "Actually decent");
   assert.equal(bandFor(51).label, "Mid");

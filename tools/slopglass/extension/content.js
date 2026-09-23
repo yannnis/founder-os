@@ -320,7 +320,7 @@ function paintMeter() {
     var score = judged ? Math.round((100 * (counts.pass + 0.5 * counts.skim)) / judged) : null;
     var face = "Nothing scored yet";
     if (score !== null) {
-      if (score <= 35) face = "We're so back";
+      if (score <= 35) face = "Worth following";
       else if (score <= 50) face = "Actually decent";
       else if (score <= 70) face = "Mid";
       else if (score <= 82) face = "Slop";

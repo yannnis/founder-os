@@ -183,7 +183,7 @@ export type Band = {
 };
 
 export const BANDS: Band[] = [
-  { id: "back", label: "We're so back", min: 0, max: 35 },
+  { id: "back", label: "Worth following", min: 0, max: 35 },
   { id: "decent", label: "Actually decent", min: 36, max: 50 },
   { id: "mid", label: "Mid", min: 51, max: 70 },
   { id: "slop", label: "Slop", min: 71, max: 82 },
