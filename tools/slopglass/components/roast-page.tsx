@@ -446,7 +446,6 @@ function ResultPreview({
       className={`mx-auto max-w-6xl px-4 pt-12 pb-16 transition-opacity duration-500 sm:px-6 ${loading ? "pointer-events-none opacity-40" : "opacity-100"}`}
       aria-label="Preview"
     >
-      <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,440px)]">
       <div>
         <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">LinkedIn</p>
         <h1 className="font-heading mt-2 max-w-xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
@@ -454,7 +453,37 @@ function ResultPreview({
           The first 20 public posts, read one at a time. Nothing to install, and no LinkedIn login on this site.
         </p>
       </div>
-
+      <div className="mt-8 grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,440px)]">
+        <div>
+        <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={onMine}
+            className="h-12 shrink-0 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
+          >
+            Run it for me
+          </button>
+          <span className="shrink-0 text-sm text-[#6f685e]">or</span>
+          <ProfileField
+            inputRef={inputRef}
+            url={url}
+            onChange={onChange}
+            placeholder="Paste the LinkedIn profile you'd like to check"
+          />
+          <button
+            type="submit"
+            disabled={loading || url.trim().length === 0}
+            className="h-12 shrink-0 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
+          >
+            {loading ? "Pulling posts…" : "Run it"}
+          </button>
+        </form>
+        {mineHint && (
+          <p className="mt-3 text-sm leading-6 text-[#5c564c]">
+            LinkedIn opened your profile. Copy that address and paste it here.
+          </p>
+        )}
+        </div>
       <aside className="rounded-[28px] bg-[#fffdf8] p-6 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
         <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">A finished read</p>
         <div className="mt-2 grid items-center gap-2 sm:grid-cols-[148px_minmax(0,1fr)]">
@@ -471,34 +500,6 @@ function ResultPreview({
         </dl>
       </aside>
       </div>
-      <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-        <button
-          type="button"
-          onClick={onMine}
-          className="h-12 shrink-0 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
-        >
-          Run it for me
-        </button>
-        <span className="shrink-0 text-sm text-[#6f685e]">or</span>
-        <ProfileField
-          inputRef={inputRef}
-          url={url}
-          onChange={onChange}
-          placeholder="Paste the LinkedIn profile you'd like to check"
-        />
-        <button
-          type="submit"
-          disabled={loading || url.trim().length === 0}
-          className="h-12 shrink-0 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6] disabled:cursor-default disabled:opacity-50"
-        >
-          {loading ? "Pulling posts…" : "Run it"}
-        </button>
-      </form>
-      {mineHint && (
-        <p className="mt-3 text-sm leading-6 text-[#5c564c]">
-          LinkedIn opened your profile. Copy that address and paste it here.
-        </p>
-      )}
     </section>
   );
 }
