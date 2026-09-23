@@ -3,8 +3,10 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const localEnv = path.join(process.cwd(), "tools", "slopglass", ".env.local");
-if (existsSync(localEnv)) {
-  for (const line of readFileSync(localEnv, "utf8").split("\n")) {
+const redditEnv = path.join(process.cwd(), "reddit", ".env");
+for (const file of [localEnv, redditEnv]) {
+  if (!existsSync(file)) continue;
+  for (const line of readFileSync(file, "utf8").split("\n")) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const eq = trimmed.indexOf("=");

@@ -11,7 +11,6 @@ import {
   flagsOf,
   jevLines,
   type ChatMessage,
-  type Finding,
 } from "@/components/roast-summary";
 import { COLORS, SlopDial } from "@/components/slop-dial";
 import { Button } from "@/components/ui/button";
@@ -243,8 +242,8 @@ export function RoastPage() {
     scan && !done && current && (!currentPhase || currentPhase === "idle" || currentPhase === "reading")
       ? `Reading post ${focus + 1} of ${posts.length}…`
       : undefined;
-  const lines = done ? jevLines(tally, breakdown) : [];
-  const findings = done ? findingsOf(tally, breakdown) : null;
+  const lines = jevLines(tally, breakdown);
+  const findings = tally.judged > 0 ? findingsOf(tally, breakdown) : null;
 
   return (
     <div className="stage min-h-full pb-28 text-[#1c1915]">
@@ -297,25 +296,18 @@ export function RoastPage() {
 
       {scan && (
         <main className="mx-auto mt-6 max-w-6xl px-4 pb-28 sm:px-6">
-          <AuditTop
-            topRef={topBlock}
-            label={done ? `All ${posts.length}` : `Post ${focus + 1} of ${posts.length}`}
-            tally={tally}
-            pending={done ? 0 : pending}
-            messages={messages}
-            typing={typing}
-            lines={lines}
-            findings={findings}
-          />
-
-          {mini && (
-            <MiniScore tally={tally} latest={lines[0] ?? messages[messages.length - 1]?.text} />
-          )}
-
-          <div className="mt-10 grid items-start gap-6 lg:grid-cols-[minmax(0,680px)_minmax(300px,1fr)]">
-          <div>
-          <p className="mb-3 text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
-          <section className="space-y-3">
+          <div ref={topBlock} className="grid items-start gap-6 lg:grid-cols-[minmax(280px,380px)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)]">
+              <ScorePanel
+                label={done ? `All ${posts.length}` : `Post ${focus + 1} of ${posts.length}`}
+                tally={tally}
+                pending={done ? 0 : pending}
+              />
+              <JevChat side typing={typing} lines={lines} findings={findings} total={tally.total} />
+            </div>
+            <div>
+              <p className="mb-3 text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
+              <section className="space-y-3">
             {posts.slice(0, focus).map((post) => (
               <PostCard
                 key={post.id}
@@ -356,13 +348,17 @@ export function RoastPage() {
                 {posts.length - focus - 1 - ahead.length} still out of focus
               </p>
             )}
-          </section>
+              </section>
+              <div className="mt-8">
+                <RoastSubscribe />
+              </div>
+            </div>
           </div>
-
-          <aside className="lg:sticky lg:top-24 lg:mt-7">
-            <RoastSubscribe />
-          </aside>
-          </div>
+          {mini && (
+            <div className="lg:hidden">
+              <MiniScore tally={tally} latest={lines[0] ?? messages[messages.length - 1]?.text} />
+            </div>
+          )}
         </main>
       )}
 
@@ -407,14 +403,16 @@ function ScorePanel({
   tally,
   pending,
   roast,
+  fill,
 }: {
   label: string;
   tally: Tally & { total: number };
   pending: number;
   roast?: string;
+  fill?: boolean;
 }) {
   return (
-    <section className="h-full rounded-[28px] bg-[#fffdf8]/90 p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2] backdrop-blur-md">
+    <section className={`${fill ? "h-full" : "shrink-0"} rounded-[28px] bg-[#fffdf8]/90 p-5 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2] backdrop-blur-md`}>
       <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">{label}</p>
       <SlopDial
         score={tally.score}
@@ -517,15 +515,33 @@ function ResultPreview({
       )}
 
       <div className={`mt-14 transition-opacity duration-500 ${loading ? "opacity-40" : "opacity-100"}`} aria-label="Preview">
-        <p className="mb-3 text-sm text-[#5c564c]">Here&apos;s a preview of what this would look like.</p>
-        <AuditTop
-          label="Preview"
-          tally={PREVIEW_TALLY}
-          pending={0}
-          messages={PREVIEW_MESSAGES}
-          lines={PREVIEW_LINES}
-          findings={PREVIEW_FINDINGS}
-        />
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(280px,380px)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-4">
+            <ScorePanel label="Preview" tally={PREVIEW_TALLY} pending={0} />
+            <JevChat side empty="Jev's summary of the profile will show up here." lines={[]} findings={null} total={0} />
+          </div>
+          <div>
+            <p className="mb-3 text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
+            <p className="mb-4 text-sm leading-6 text-[#5c564c]">Your post performance will show up here.</p>
+            <div className="space-y-3">
+              {SAMPLE_POSTS.map((post, index) => (
+                <div
+                  key={post.id}
+                  aria-hidden={index > 0 ? true : undefined}
+                  className={
+                    index === 0
+                      ? undefined
+                      : index === 1
+                        ? "pointer-events-none opacity-45 select-none"
+                        : "pointer-events-none max-h-36 overflow-hidden opacity-20 select-none"
+                  }
+                >
+                  <LinkedInPost post={post} name="Your name" compact />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -543,66 +559,47 @@ const PREVIEW_TALLY: Tally & { total: number } = {
   total: 20,
 };
 
-const PREVIEW_MESSAGES: ChatMessage[] = [
+const SAMPLE_POSTS: PublicPost[] = [
   {
-    id: "p1",
-    bucket: "read",
-    text: "Post 1, “We lost our biggest customer on a Tuesday…”: Something specific, and it wasn't already obvious.",
+    id: "sample-1",
+    text: "We lost our biggest customer on a Tuesday. The postmortem was one page. The lesson was shorter: we had no second buyer.",
+    repost: false,
+    time: "2d",
+    headline: "Founder",
+    avatar: null,
+    reactions: 128,
+    comments: 24,
+    reposts: 3,
+    media: null,
+    quoted: null,
   },
   {
-    id: "p2",
-    bucket: "pass",
-    text: "Post 2, “Agree? Comment YES below…”: It wants a reply. That is the whole post.",
-    tags: ["Asks for replies", "Viral template"],
+    id: "sample-2",
+    text: "Investors used to hate usage-based pricing. Now they are the ones asking for it in the board meeting.",
+    repost: false,
+    time: "4d",
+    headline: "Founder",
+    avatar: null,
+    reactions: 86,
+    comments: 11,
+    reposts: 2,
+    media: null,
+    quoted: null,
   },
   {
-    id: "p3",
-    bucket: "skim",
-    text: "Post 3, “5 lessons from 10 years in SaaS…”: Worth a glance. There isn't much underneath.",
-    tags: ["Sounds AI-written", "Viral template", "Nothing specific"],
+    id: "sample-3",
+    text: "Last year the launch post went viral for the wrong reason. The product page is what actually moved.",
+    repost: false,
+    time: "1w",
+    headline: "Founder",
+    avatar: null,
+    reactions: 54,
+    comments: 7,
+    reposts: 1,
+    media: null,
+    quoted: null,
   },
 ];
-
-const PREVIEW_LINES = [
-  "14 of 20 posts were worth reading.",
-  "3 of them sound like a model wrote them. The ones that fail are collecting replies.",
-];
-
-const PREVIEW_FINDINGS: Finding[] = [
-  { label: "worth reading", count: 14, tone: "good" },
-  { label: "sound AI-written", count: 3, tone: "bad" },
-  { label: "viral template", count: 2, tone: "bad" },
-  { label: "asked for replies", count: 1, tone: "bad" },
-  { label: "selling", count: 1, tone: "bad" },
-  { label: "nothing specific", count: 5, tone: "bad" },
-];
-
-function AuditTop({
-  topRef,
-  label,
-  tally,
-  pending,
-  messages,
-  typing,
-  lines,
-  findings,
-}: {
-  topRef?: RefObject<HTMLDivElement | null>;
-  label: string;
-  tally: Tally & { total: number };
-  pending: number;
-  messages: ChatMessage[];
-  typing?: string;
-  lines: string[];
-  findings: Finding[] | null;
-}) {
-  return (
-    <div ref={topRef} className="grid items-stretch gap-4 md:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-      <ScorePanel label={label} tally={tally} pending={pending} />
-      <JevChat messages={messages} typing={typing} lines={lines} findings={findings} total={tally.total} />
-    </div>
-  );
-}
 
 function MiniScore({ tally, latest }: { tally: Tally & { total: number }; latest?: string }) {
   const shown = tally.score === null ? null : Math.round(tally.score);

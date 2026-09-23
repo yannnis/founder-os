@@ -34,6 +34,8 @@
     "app/**/*.tsx",
     "tools/slopglass/**/*.ts",
     "tools/slopglass/**/*.tsx",
+    "reddit/**/*.ts",
+    "reddit/**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
@@ -44,6 +46,8 @@
     "public",
     "tools/slopglass/node_modules",
     "tools/slopglass/extension",
+    "reddit/node_modules",
+    "reddit/.next",
     "**/*.test.ts"
   ]
 }

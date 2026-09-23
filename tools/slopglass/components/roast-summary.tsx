@@ -126,15 +126,6 @@ export type ChatMessage = {
   tags?: string[];
 };
 
-const BUCKET_TONE: Record<NonNullable<ChatMessage["bucket"]>, { label: string; className: string }> = {
-  read: { label: "Read", className: "bg-[#e7f6ee] text-[#145236]" },
-  skim: { label: "Skim", className: "bg-[#fbf3df] text-[#6d4708]" },
-  pass: { label: "Skip", className: "bg-[#fde8e2] text-[#8d2a16]" },
-  thin: { label: "Skim", className: "bg-[#fbf3df] text-[#6d4708]" },
-  repost: { label: "Repost", className: "bg-[#eee7db] text-[#5c564c]" },
-  error: { label: "Missed", className: "bg-[#eee7db] text-[#8d2a16]" },
-};
-
 const FINDING_TONE: Record<Finding["tone"], string> = {
   good: "border-[#cfe8da] bg-[#eef8f2] text-[#145236]",
   bad: "border-[#f2d3ca] bg-[#fdf0ec] text-[#8d2a16]",
@@ -146,49 +137,39 @@ function Pill({ children, className }: { children: ReactNode; className: string 
 }
 
 export function JevChat({
-  messages,
   typing,
   lines,
   findings,
   total,
+  side,
+  empty,
 }: {
-  messages: ChatMessage[];
   typing?: string;
   lines: string[];
   findings: Finding[] | null;
   total: number;
+  side?: boolean;
+  empty?: string;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const node = scroller.current;
     if (node) node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
-  }, [messages.length, typing, findings, lines.length]);
+  }, [typing, findings, lines.length]);
 
   return (
-    <section className="relative min-h-[490px] rounded-[28px] bg-[#fffdf8] shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
-      <div className="absolute inset-0 flex flex-col p-5">
+    <section
+      className={
+        side
+          ? "relative flex min-h-[220px] flex-1 flex-col overflow-hidden rounded-[28px] bg-[#fffdf8] shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]"
+          : "relative min-h-[490px] rounded-[28px] bg-[#fffdf8] shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]"
+      }
+    >
+      <div className={side ? "flex min-h-0 flex-1 flex-col p-5" : "absolute inset-0 flex flex-col p-5"}>
         <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">Jev</p>
         <div ref={scroller} className="mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-          {messages.map((message) => (
-            <div key={message.id} className="rounded-[18px] bg-[#f6f1e6] px-4 py-2.5 text-sm leading-6 text-[#1c1915]">
-              {message.bucket && (
-                <span className={`mr-2 inline-flex rounded-full px-2 py-0.5 text-xs ${BUCKET_TONE[message.bucket].className}`}>
-                  {BUCKET_TONE[message.bucket].label}
-                </span>
-              )}
-              {message.text}
-              {message.tags && message.tags.length > 0 && (
-                <span className="mt-1.5 flex flex-wrap gap-1.5">
-                  {message.tags.map((tag) => (
-                    <span key={tag} className="rounded-full border border-[#e7dfd2] bg-[#fffdf8] px-2 py-0.5 text-xs text-[#5c564c]">
-                      {tag}
-                    </span>
-                  ))}
-                </span>
-              )}
-            </div>
-          ))}
+          {lines.length === 0 && !findings && empty ? <p className="text-sm leading-6 text-[#6f685e]">{empty}</p> : null}
           {typing && (
             <div className="flex items-center gap-2 px-1 py-1 text-sm text-[#6f685e]">
               <span className="worth-pulse size-2 rounded-full bg-[#c4922a]" />

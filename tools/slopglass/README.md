@@ -7,7 +7,7 @@ Each post is **Read**, **Skim**, or **Skip**. The number on the dial is the shar
 There are two totals:
 
 - **Feed.** How much of the scroll in front of you is worth your time. Posts are judged as they reach the screen.
-- **Profile.** How much of one person’s recent posts is worth reading. On yannnis.com this lives at `/linkedin-audit`. `/linkedin-audit/demo` still has two sample profiles.
+- **Profile.** How much of one person’s recent posts is worth reading. On yannnis.com this lives at `/linkedin-audit`.
 
 The judgment comes from [Jev](https://docs.typesafe.ai), TypeSafe’s System One model. Jev answers six yes-or-no questions. The bucket is those answers, composed in code. It does not guess whether a model wrote the post, and likes do not move the score.
 
@@ -23,7 +23,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open http://127.0.0.1:38471/linkedin-audit. It takes a public `linkedin.com/in/…` URL, loads the first 20 posts, and scores them one at a time. The fixture feed stays at `/linkedin-audit/demo`. Both keys stay in `.env.local`.
+Open http://127.0.0.1:38471/linkedin-audit. It takes a public `linkedin.com/in/…` URL, loads the first 20 posts, and scores them one at a time. Both keys stay in `.env.local`.
 
 ## Put it on LinkedIn
 
