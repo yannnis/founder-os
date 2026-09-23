@@ -77,7 +77,7 @@ export function WorthBar({
           <p className="mt-1 text-xs leading-5 text-[#5c564c]">{copy.hint}</p>
           <ul className="mt-3 space-y-1.5">
             {SIGNAL_ROWS.map((row) => {
-              const value = reading.features[row.key];
+              const value = reading.features[row.key] ?? 0;
               return (
                 <li key={row.key} className="grid grid-cols-[88px_1fr_28px] items-center gap-2 text-xs">
                   <span>{row.label}</span>

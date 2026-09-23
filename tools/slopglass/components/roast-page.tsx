@@ -3,8 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type RefObject } from "react";
 
 import { LinkedInPost } from "@/components/linkedin-post";
-import { JevCard, RoastSubscribe, auditBreakdown, jevLines, summaryPills } from "@/components/roast-summary";
-import { SlopDial } from "@/components/slop-dial";
+import {
+  JevChat,
+  RoastSubscribe,
+  auditBreakdown,
+  findingsOf,
+  flagsOf,
+  jevLines,
+  type ChatMessage,
+  type Finding,
+} from "@/components/roast-summary";
+import { COLORS, SlopDial } from "@/components/slop-dial";
 import { Button } from "@/components/ui/button";
 import { WorthBar, type ReadyReading } from "@/components/worth-bar";
 import type { LinkedInProfile } from "@/lib/linkedin/url";
@@ -44,6 +53,9 @@ export function RoastPage() {
   const phases = useRef<Record<string, Phase>>({});
   const scanId = useRef(0);
   const focusNode = useRef<HTMLElement | null>(null);
+  const topBlock = useRef<HTMLDivElement>(null);
+  const following = useRef(false);
+  const [mini, setMini] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -139,8 +151,23 @@ export function RoastPage() {
   }, [current, currentPhase, focus, posts.length, scan]);
 
   useEffect(() => {
-    focusNode.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (following.current) focusNode.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [focus, scan]);
+
+  useEffect(() => {
+    const node = topBlock.current;
+    if (!scan || !node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const away = entry.intersectionRatio < 0.35;
+        following.current = away;
+        setMini(away);
+      },
+      { threshold: [0, 0.35, 1] },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [scan]);
 
   function openMine() {
     window.open("https://www.linkedin.com/in/me/", "_blank", "noopener,noreferrer");
@@ -158,6 +185,8 @@ export function RoastPage() {
     setScan(null);
     setCards({});
     setFocus(0);
+    setMini(false);
+    following.current = false;
 
     try {
       const response = await fetch("/api/linkedin", {
@@ -196,6 +225,26 @@ export function RoastPage() {
 
   const ahead = posts.slice(focus + 1, focus + 3);
   const done = focus >= posts.length - 1 && currentPhase !== undefined && SETTLED.includes(currentPhase);
+  const pending = posts.filter((post) => cards[post.id]?.phase === "reading").length;
+
+  const messages = useMemo<ChatMessage[]>(() => {
+    if (!scan) return [];
+    const list: ChatMessage[] = [
+      { id: "intro", text: `Pulled ${scan.posts.length} public posts from ${scan.profile.name}. Reading them one at a time.` },
+    ];
+    scan.posts.slice(0, focus + 1).forEach((post, index) => {
+      const message = messageFor(post, cards[post.id], index);
+      if (message) list.push(message);
+    });
+    return list;
+  }, [cards, focus, scan]);
+
+  const typing =
+    scan && !done && current && (!currentPhase || currentPhase === "idle" || currentPhase === "reading")
+      ? `Reading post ${focus + 1} of ${posts.length}…`
+      : undefined;
+  const lines = done ? jevLines(tally, breakdown) : [];
+  const findings = done ? findingsOf(tally, breakdown) : null;
 
   return (
     <div className="stage min-h-full pb-28 text-[#1c1915]">
@@ -247,22 +296,24 @@ export function RoastPage() {
       )}
 
       {scan && (
-        <main className="mx-auto mt-4 max-w-6xl px-4 pb-28 sm:px-6">
-          {done && (
-            <div className="sticky top-0 z-30 -mx-4 mb-6 bg-[#f3eee4]/92 px-4 pt-2 pb-4 backdrop-blur-md">
-              <div className="grid items-stretch gap-4 md:grid-cols-[minmax(240px,340px)_minmax(0,1fr)]">
-                <ScorePanel
-                  label={`All ${posts.length}`}
-                  tally={tally}
-                  pending={0}
-                />
-                <JevCard lines={jevLines(tally, breakdown)} pills={summaryPills(tally, breakdown, posts.length)} />
-              </div>
-            </div>
+        <main className="mx-auto mt-6 max-w-6xl px-4 pb-28 sm:px-6">
+          <AuditTop
+            topRef={topBlock}
+            label={done ? `All ${posts.length}` : `Post ${focus + 1} of ${posts.length}`}
+            tally={tally}
+            pending={done ? 0 : pending}
+            messages={messages}
+            typing={typing}
+            lines={lines}
+            findings={findings}
+          />
+
+          {mini && (
+            <MiniScore tally={tally} latest={lines[0] ?? messages[messages.length - 1]?.text} />
           )}
 
-          <div className={`grid gap-8 ${done ? "" : "md:grid-cols-[minmax(0,680px)_300px]"}`}>
-          <section className={`space-y-3 ${done ? "" : "order-2 md:order-1"}`}>
+          <p className="mx-auto mt-10 mb-3 max-w-[680px] text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">The posts</p>
+          <section className="mx-auto max-w-[680px] space-y-3">
             {posts.slice(0, focus).map((post) => (
               <PostCard
                 key={post.id}
@@ -305,19 +356,8 @@ export function RoastPage() {
             )}
           </section>
 
-          {!done && (
-          <aside className="order-1 md:sticky md:top-4 md:order-2 md:self-start">
-            <ScorePanel
-              label={`Post ${focus + 1} of ${posts.length}`}
-              tally={tally}
-              pending={posts.filter((post) => cards[post.id]?.phase === "reading").length}
-              roast={tally.judged > 0 ? tally.roast : undefined}
-            />
-          </aside>
-          )}
-          </div>
           {done && (
-            <div className="mt-8">
+            <div className="mx-auto mt-8 max-w-[680px]">
               <RoastSubscribe />
             </div>
           )}
@@ -440,30 +480,13 @@ function ResultPreview({
   onSubmit: (event: FormEvent) => void;
   onMine: () => void;
 }) {
-  const band = bandFor(8);
   return (
-    <section
-      className={`mx-auto max-w-6xl px-4 pt-12 pb-16 transition-opacity duration-500 sm:px-6 ${loading ? "pointer-events-none opacity-40" : "opacity-100"}`}
-      aria-label="Preview"
-    >
-      <div>
-        <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">LinkedIn</p>
-        <h1 className="font-heading mt-2 max-w-xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
-        <p className="mt-4 max-w-md text-sm leading-6 text-[#5c564c]">
-          The first 20 public posts, read one at a time. Nothing to install, and no LinkedIn login on this site.
-        </p>
-      </div>
-      <div className="mt-8 grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,440px)]">
-        <div>
-        <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <button
-            type="button"
-            onClick={onMine}
-            className="h-12 shrink-0 cursor-pointer rounded-full bg-[#1c1915] px-6 text-sm text-[#f6f1e6]"
-          >
-            Run it for me
-          </button>
-          <span className="shrink-0 text-sm text-[#6f685e]">or</span>
+    <section className="mx-auto max-w-6xl px-4 pt-12 pb-16 sm:px-6">
+      <h1 className="font-heading max-w-2xl text-5xl tracking-tight sm:text-6xl">How cooked is my LinkedIn?</h1>
+      <p className="mt-4 max-w-xl text-base leading-7 text-[#5c564c]">
+        We read your first 20 public posts, one at a time, and rate each one with Jev AI.
+      </p>
+      <form onSubmit={onSubmit} className="mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center">
           <ProfileField
             inputRef={inputRef}
             url={url}
@@ -477,42 +500,160 @@ function ResultPreview({
           >
             {loading ? "Pulling posts…" : "Run it"}
           </button>
-        </form>
-        {mineHint && (
-          <p className="mt-3 text-sm leading-6 text-[#5c564c]">
-            LinkedIn opened your profile. Copy that address and paste it here.
-          </p>
-        )}
-        </div>
-      <aside className="rounded-[28px] bg-[#fffdf8] p-6 shadow-[0_24px_60px_rgba(28,25,21,0.08)] ring-1 ring-[#e7dfd2]">
-        <p className="text-[11px] tracking-[0.22em] text-[#6f685e] uppercase">A finished read</p>
-        <div className="mt-2 grid items-center gap-2 sm:grid-cols-[148px_minmax(0,1fr)]">
-          <SlopDial score={8} band={band} judged={20} total={20} pending={0} read={18} skim={1} pass={1} compact />
-          <div>
-            <p className="font-heading text-2xl leading-7 tracking-tight">18 of 20 posts were worth reading.</p>
-            <p className="mt-2 text-sm leading-6 text-[#5c564c]">I went looking for junk. I could not find much.</p>
-          </div>
-        </div>
-        <dl className="mt-4 grid grid-cols-3 gap-2">
-          <CountChip label="Read" value="18" tone="#145236" />
-          <CountChip label="Skim" value="1" tone="#6d4708" />
-          <CountChip label="Pass" value="0" tone="#8d2a16" />
-        </dl>
-      </aside>
+      </form>
+      <p className="mt-3 text-sm leading-6 text-[#5c564c]">
+        Don&apos;t know your LinkedIn profile URL?{" "}
+        <button type="button" onClick={onMine} className="cursor-pointer text-[#1c1915] underline underline-offset-4">
+          Click here to go to LinkedIn
+        </button>{" "}
+        and copy what&apos;s in the address bar.
+      </p>
+      {mineHint && (
+        <p className="mt-1 text-sm leading-6 text-[#1f6b45]">LinkedIn opened in a new tab. Copy the address and paste it above.</p>
+      )}
+
+      <div className={`mt-14 transition-opacity duration-500 ${loading ? "opacity-40" : "opacity-100"}`} aria-label="Preview">
+        <p className="mb-3 text-sm text-[#5c564c]">Here&apos;s a preview of what this would look like.</p>
+        <AuditTop
+          label="Preview"
+          tally={PREVIEW_TALLY}
+          pending={0}
+          messages={PREVIEW_MESSAGES}
+          lines={PREVIEW_LINES}
+          findings={PREVIEW_FINDINGS}
+        />
       </div>
     </section>
   );
 }
 
-function CountChip({ label, value, tone }: { label: string; value: string; tone: string }) {
+const PREVIEW_TALLY: Tally & { total: number } = {
+  read: 14,
+  skim: 4,
+  pass: 2,
+  judged: 20,
+  skipped: 0,
+  score: 20,
+  band: bandFor(20),
+  roast: "",
+  total: 20,
+};
+
+const PREVIEW_MESSAGES: ChatMessage[] = [
+  {
+    id: "p1",
+    bucket: "read",
+    text: "Post 1, “We lost our biggest customer on a Tuesday…”: Something specific, and it wasn't already obvious.",
+  },
+  {
+    id: "p2",
+    bucket: "pass",
+    text: "Post 2, “Agree? Comment YES below…”: It wants a reply. That is the whole post.",
+    tags: ["Asks for replies", "Viral template"],
+  },
+  {
+    id: "p3",
+    bucket: "skim",
+    text: "Post 3, “5 lessons from 10 years in SaaS…”: Worth a glance. There isn't much underneath.",
+    tags: ["Sounds AI-written", "Viral template", "Nothing specific"],
+  },
+];
+
+const PREVIEW_LINES = [
+  "14 of 20 posts were worth reading.",
+  "3 of them sound like a model wrote them. The ones that fail are collecting replies.",
+];
+
+const PREVIEW_FINDINGS: Finding[] = [
+  { label: "worth reading", count: 14, tone: "good" },
+  { label: "sound AI-written", count: 3, tone: "bad" },
+  { label: "viral template", count: 2, tone: "bad" },
+  { label: "asked for replies", count: 1, tone: "bad" },
+  { label: "selling", count: 1, tone: "bad" },
+  { label: "nothing specific", count: 5, tone: "bad" },
+];
+
+function AuditTop({
+  topRef,
+  label,
+  tally,
+  pending,
+  messages,
+  typing,
+  lines,
+  findings,
+}: {
+  topRef?: RefObject<HTMLDivElement | null>;
+  label: string;
+  tally: Tally & { total: number };
+  pending: number;
+  messages: ChatMessage[];
+  typing?: string;
+  lines: string[];
+  findings: Finding[] | null;
+}) {
   return (
-    <div className="rounded-2xl bg-[#f6f1e6] px-2 py-2 text-center">
-      <dt className="text-[10px] tracking-[0.14em] text-[#6f685e] uppercase">{label}</dt>
-      <dd className="font-heading text-2xl leading-none" style={{ color: tone }}>
-        {value}
-      </dd>
+    <div ref={topRef} className="grid items-stretch gap-4 md:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+      <ScorePanel label={label} tally={tally} pending={pending} />
+      <JevChat messages={messages} typing={typing} lines={lines} findings={findings} total={tally.total} />
     </div>
   );
+}
+
+function MiniScore({ tally, latest }: { tally: Tally & { total: number }; latest?: string }) {
+  const shown = tally.score === null ? null : Math.round(tally.score);
+  const tone = tally.band ? COLORS[tally.band.id] : "#8a8175";
+  return (
+    <div className="fixed inset-x-0 top-0 z-30 border-b border-[#e7dfd2] bg-[#f3eee4]/92 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2 sm:px-6">
+        <SlopDial
+          score={tally.score}
+          band={tally.band}
+          judged={tally.judged}
+          total={tally.total}
+          pending={0}
+          read={tally.read}
+          skim={tally.skim}
+          pass={tally.pass}
+          mini
+        />
+        <p className="font-heading text-3xl leading-none tabular-nums" style={{ color: tone }}>
+          {shown === null ? "—" : shown}
+        </p>
+        <div className="min-w-0">
+          <p className="font-heading text-base leading-5 italic">{tally.band ? tally.band.label : "Waiting on the first post"}</p>
+          <p className="text-xs text-[#6f685e]">
+            {tally.read} read · {tally.skim} skim · {tally.pass} pass
+          </p>
+        </div>
+        {latest && (
+          <p className="ml-auto hidden max-w-md truncate rounded-full bg-[#fffdf8] px-4 py-1.5 text-sm text-[#1c1915] ring-1 ring-[#e7dfd2] md:block">
+            <span className="font-heading text-[#c4922a]">Jev:</span> {latest}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function snippet(text: string, max = 44): string {
+  const line = text.replace(/\s+/g, " ").trim();
+  return line.length > max ? `${line.slice(0, max).trimEnd()}…` : line;
+}
+
+function messageFor(post: PublicPost, card: CardState | undefined, index: number): ChatMessage | null {
+  const lead = post.text.trim() ? `Post ${index + 1}, “${snippet(post.text)}”` : `Post ${index + 1}`;
+  if (post.repost || card?.phase === "repost") {
+    return { id: post.id, bucket: "repost", text: `${lead}: someone else is talking. Not scored.` };
+  }
+  if (!card) return null;
+  if (card.phase === "thin") return { id: post.id, bucket: "thin", text: `${lead}: ${THIN_REASON}` };
+  if (card.phase === "error") return { id: post.id, bucket: "error", text: `${lead}: ${card.message || "Couldn't read this."}` };
+  if (card.phase === "ready" && card.features) {
+    const bucket = bucketOf(card.features);
+    return { id: post.id, bucket, text: `${lead}: ${postReason(card.features, bucket)}`, tags: flagsOf(card.features) };
+  }
+  return null;
 }
 
 function contribution(post: PublicPost, card: CardState | undefined): Contribution | null {

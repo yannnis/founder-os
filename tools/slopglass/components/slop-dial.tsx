@@ -1,6 +1,6 @@
 import { BANDS, type Band } from "@/lib/slop/worth";
 
-const COLORS: Record<Band["id"], string> = {
+export const COLORS: Record<Band["id"], string> = {
   back: "#1f6b45",
   decent: "#3e8f62",
   mid: "#c4922a",
@@ -35,6 +35,7 @@ export function SlopDial({
   skim,
   pass,
   compact,
+  mini,
 }: {
   score: number | null;
   band: Band | null;
@@ -45,6 +46,7 @@ export function SlopDial({
   skim: number;
   pass: number;
   compact?: boolean;
+  mini?: boolean;
 }) {
   const shown = score === null ? null : Math.round(score);
   const armed = judged > 0 || shown !== null;
@@ -53,7 +55,7 @@ export function SlopDial({
 
   return (
     <figure className="m-0">
-      <svg viewBox="0 0 200 118" className={compact ? "mx-auto w-36" : "w-full"} role="img" aria-label={band ? `${shown} percent. ${band.label}` : "No score yet"}>
+      <svg viewBox="0 0 200 118" className={mini ? "w-16" : compact ? "mx-auto w-36" : "w-full"} role="img" aria-label={band ? `${shown} percent. ${band.label}` : "No score yet"}>
         {BANDS.map((item) => (
           <path
             key={item.id}
@@ -76,6 +78,7 @@ export function SlopDial({
         <circle cx="100" cy="108" r="5.5" fill={hub} />
         <circle cx="100" cy="108" r="2.2" fill="#f6f1e6" />
       </svg>
+      {!mini && (
       <figcaption className="-mt-3 text-center">
         <p className={`font-heading leading-none tracking-tight tabular-nums ${compact ? "text-5xl" : "text-7xl"}`} style={{ color: hub }}>
           {shown === null ? "—" : shown}
@@ -95,6 +98,7 @@ export function SlopDial({
         </dl>
         )}
       </figcaption>
+      )}
     </figure>
   );
 }

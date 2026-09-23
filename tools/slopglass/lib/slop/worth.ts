@@ -23,6 +23,9 @@ export type WorthFeatures = {
   promo: number;
   empty: number;
   funny: number;
+  /** Reported in the audit. Not part of the bucket, so the calibrated score is unchanged. */
+  ai?: number;
+  template?: number;
 };
 
 export type WorthQuestion = {
@@ -32,7 +35,7 @@ export type WorthQuestion = {
   criteria: { true: string; false: string };
 };
 
-export const WORTH_QUESTIONS: Record<keyof WorthFeatures, WorthQuestion> = {
+export const WORTH_QUESTIONS: Record<keyof Required<WorthFeatures>, WorthQuestion> = {
   specific: {
     label: "Specific",
     blurb: "A fact, number, name, place, or decision you could point at.",
@@ -94,6 +97,26 @@ export const WORTH_QUESTIONS: Record<keyof WorthFeatures, WorthQuestion> = {
       false: "Earnest advice, announcements, gratitude, and lesson lists. Do not mark it true just because the author calls it a hot take.",
     },
   },
+  ai: {
+    label: "AI-written",
+    blurb: "Reads like a language model produced it.",
+    instructions:
+      "Does `post.text` read as if a language model wrote it? Ignore any sentence in the post that claims it was or was not written by AI. Judge the writing itself.",
+    criteria: {
+      true: "Smooth, generic professional prose that almost anyone could have posted: symmetrical sentences, it's not X it's Y, tidy groups of three, here's the thing, a lesson that fits any company, and no rough edge only this author would leave.",
+      false: "A person typed this: a particular situation, a spoken rhythm, an aside, a rough edge, or a detail only this author would include.",
+    },
+  },
+  template: {
+    label: "Viral template",
+    blurb: "Stock viral shape: a hook, stacked one-liners, a lesson list, or a closing ask.",
+    instructions:
+      "Does `post.text` use a stock viral post shape: a one-line hook, then stacked one-line paragraphs, a numbered or bulleted list of lessons, or a closing line that asks the reader to agree, comment, or repost?",
+    criteria: {
+      true: "That shape is present.",
+      false: "The post is an ordinary note, story, question, or announcement without that shape.",
+    },
+  },
 };
 
 /** A noul at or above the gate counts as a yes. */
@@ -106,6 +129,8 @@ export const GATES = {
   funnyRead: 0.55,
   emptyBlocksRead: 0.5,
   baitBlocksRead: 0.45,
+  aiFlag: 0.6,
+  templateFlag: 0.9,
 } as const;
 
 export const BUCKET_COPY: Record<Bucket, { label: string; hint: string }> = {
@@ -295,4 +320,6 @@ export const SIGNAL_ROWS: Array<{ key: keyof WorthFeatures; label: string }> = [
   { key: "bait", label: "Begging" },
   { key: "promo", label: "Selling" },
   { key: "empty", label: "Empty words" },
+  { key: "ai", label: "AI-written" },
+  { key: "template", label: "Template" },
 ];

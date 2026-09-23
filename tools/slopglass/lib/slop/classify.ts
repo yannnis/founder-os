@@ -7,7 +7,7 @@ import type { ClassifyResponse, SlopReading } from "./types";
 import { BUCKET_COPY, WORTH_QUESTIONS, bucketOf, postReason, type WorthFeatures } from "./worth";
 
 const CACHE_LIMIT = 500;
-const CACHE_PREFIX = "worth1:";
+const CACHE_PREFIX = "worth2:";
 
 type CacheEntry = {
   features: WorthFeatures;
@@ -69,6 +69,8 @@ function questions() {
     promo: noul(WORTH_QUESTIONS.promo.instructions, WORTH_QUESTIONS.promo.criteria),
     empty: noul(WORTH_QUESTIONS.empty.instructions, WORTH_QUESTIONS.empty.criteria),
     funny: noul(WORTH_QUESTIONS.funny.instructions, WORTH_QUESTIONS.funny.criteria),
+    ai: noul(WORTH_QUESTIONS.ai.instructions, WORTH_QUESTIONS.ai.criteria),
+    template: noul(WORTH_QUESTIONS.template.instructions, WORTH_QUESTIONS.template.criteria),
   };
 }
 
@@ -96,6 +98,8 @@ async function askJev(text: string): Promise<CacheEntry> {
       promo: answers.promo.noul,
       empty: answers.empty.noul,
       funny: answers.funny.noul,
+      ai: answers.ai.noul,
+      template: answers.template.noul,
     };
     const entry: CacheEntry = {
       features,
