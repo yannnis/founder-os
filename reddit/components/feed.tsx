@@ -567,6 +567,7 @@ export function RedditFeed() {
             {feedError ? <p className="alert">{feedError}</p> : null}
           </div>
         </div>
+        <SitePill />
       </div>
     );
   }
@@ -661,6 +662,26 @@ export function RedditFeed() {
           ) : null}
         </section>
       </main>
+      <SitePill />
+    </div>
+  );
+}
+
+function SitePill() {
+  return (
+    <div className="site-pill">
+      <div className="site-pill-inner">
+        <img src="/yannnis-substack.jpg" alt="" width={34} height={34} />
+        <span>
+          <a href="https://www.linkedin.com/in/yannis-psarras" target="_blank" rel="noopener noreferrer">
+            LinkedIn
+          </a>
+          <span aria-hidden="true">|</span>
+          <a href="https://yannnis.substack.com/" target="_blank" rel="noopener noreferrer">
+            Substack
+          </a>
+        </span>
+      </div>
     </div>
   );
 }
