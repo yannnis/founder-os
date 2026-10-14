@@ -26,6 +26,14 @@ for (const file of [localEnv, redditEnv]) {
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@typesafe-ai/sdk"],
   allowedDevOrigins: ["127.0.0.1", "localhost"],
+  async rewrites() {
+    return [
+      {
+        source: "/vagia-house",
+        destination: "/vagia-house/index.html",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
